@@ -35,8 +35,13 @@ async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
     )
 
 
-async def add_price(session: AsyncSession, matrix: PriceCreateRequest) -> Price:
-    new_matrix = Price(id=matrix.id, name=matrix.name)
+async def add_price(session: AsyncSession, price: PriceCreateRequest) -> Price:
+    new_matrix = Price(
+        price=price.price,
+        matrix_id=price.matrix_id,
+        location_id=price.location_id,
+        category_id=price.category_id
+    )
 
     session.add(new_matrix)
     await session.commit()
