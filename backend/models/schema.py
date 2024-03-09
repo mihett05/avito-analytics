@@ -29,6 +29,7 @@ class Categories(Base):
 class Prices(Base):
     __tablename__ = "prices"
 
+    price: Mapped[int] = mapped_column(INT)
     matrix_id: Mapped[int] = mapped_column(ForeignKey("matrices.id"), primary_key=True)
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"), primary_key=True)
     microcategory_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), primary_key=True)
