@@ -16,6 +16,10 @@ async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False
 Base = declarative_base()
 
 
+async def init_models():
+    pass
+
+
 class Locations(Base):
     __tablename__ = "locations"
 

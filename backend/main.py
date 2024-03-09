@@ -4,11 +4,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api import api
-from config import get_config
+from models.models import init_models
 
 
 @asynccontextmanager
 async def lifespan(*args):
+    await init_models()
     yield
 
 
