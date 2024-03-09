@@ -6,16 +6,16 @@ from deps.sql_session import get_session
 router = APIRouter()
 
 
-@router.get("/category/", tags=["categories"])
+@router.get("/prices/", tags=["prices"])
 async def read_categories(session: AsyncSession = Depends(get_session)):
     pass
 
 
-@router.get("/category/{category_id}", tags=["categories"])
-async def read_category(category_id: int, session: AsyncSession = Depends(get_session)):
+@router.get("/prices/{price_id}", tags=["prices"])
+async def read_category(price_id: int, session: AsyncSession = Depends(get_session)):
     pass
 
 
-@router.post("/category/", tags=["categories"])
+@router.post("/prices/", tags=["prices"])
 async def create_categories(session: AsyncSession = Depends(get_session)):
     pass
