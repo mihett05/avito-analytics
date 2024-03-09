@@ -1,4 +1,11 @@
 from fastapi import APIRouter
 
+from .matrices import router as mat_router
+from .locations import router as loc_router
+from .categories import router as cat_router
+
 api = APIRouter()
-# include routers here
+
+api.include_router(mat_router)
+api.include_router(loc_router)
+api.include_router(cat_router)

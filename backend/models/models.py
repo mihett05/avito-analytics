@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm import sessionmaker
 
 from config import get_config
@@ -44,9 +44,15 @@ class Prices(Base):
     __tablename__ = "prices"
 
     price: Mapped[int] = mapped_column()
+
     matrix_id: Mapped[int] = mapped_column(ForeignKey("matrices.id"), primary_key=True)
+    matrix: Mapped["Matrices"] = relationship(back_populates="prices")
+
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"), primary_key=True)
-    microcategory_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), primary_key=True)
+    location: Mapped["Locations"] = relationship(back_populates="prices")
+
+    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), primary_key=True)
+    category: Mapped["Categories"] = relationship(back_populates="prices")
 
 
 class Matrices(Base):
