@@ -1,9 +1,19 @@
-from sqlalchemy import String, INT, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import sessionmaker
 
+from config import get_config
 
-class Base(DeclarativeBase):
-    pass
+config = get_config()
+database_url = f"postgresql+asyncpg://{config.POSTGRES_USER}:{config.POSTGRES_PASSWORD}@{config.POSTGRES_HOST}:" \
+               f"{config.POSTGRES_PORT}/{config.POSTGRES_DB}"
+
+engine = create_async_engine(database_url, echo=True)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+Base = declarative_base()
 
 
 class Locations(Base):
@@ -41,4 +51,3 @@ class Matrices(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     segment_id: Mapped[int] = mapped_column(nullable=True)
-
