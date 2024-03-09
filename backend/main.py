@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api import api
+from config import get_config
 
 
 @asynccontextmanager
@@ -26,4 +27,4 @@ app.add_middleware(
 if __name__ == "__main__":
     from uvicorn import run
 
-    run("main:app", reload=True, port=8000)
+    run("main:app", reload=True, port=5000)
