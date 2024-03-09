@@ -3,10 +3,10 @@
 
 echo "Migrate the database at startup of project"
 
-#while ! alembic upgrade head  2>&1; do
-#  echo "Migration is in progress status"
-#  sleep 3
-#done
+while ! alembic upgrade head  2>&1; do
+  echo "Migration is in progress status"
+  sleep 3
+done
 
 echo "Migration done"
 
