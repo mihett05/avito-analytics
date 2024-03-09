@@ -7,11 +7,12 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from config import get_config
-from models.engine import Base
+from models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 cnfg = get_config()
+
 config = context.config
 
 section = config.config_ini_section

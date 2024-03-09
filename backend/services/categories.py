@@ -9,12 +9,23 @@ from schemas.categories import CategoryCreateRequest
 
 async def get_categories(session: AsyncSession) -> List[Category]:
     result = await session.execute(select(Category))
-    return [Category(res) for res in result.scalars().all()]
+    return [Category(
+        id=res.id,
+        key=res.key,
+        name=res.name,
+        parent_id=res.parent_id,
+    ) for res in result.scalars().all()]
 
 
 async def get_category(session: AsyncSession, category_id: int) -> Category:
-    result = await session.execute(select(Category).where(id=category_id))
-    return result.scalar()
+    result = await session.execute(select(Category).where(Category.id == category_id))
+    res = result.scalar()
+    return Category(
+        id=res.id,
+        key=res.key,
+        name=res.name,
+        parent_id=res.parent_id,
+    )
 
 
 async def add_category(session: AsyncSession, category: CategoryCreateRequest) -> Category:

@@ -15,4 +15,3 @@ Base = declarative_base()
 
 async def init_models():
     pass
-

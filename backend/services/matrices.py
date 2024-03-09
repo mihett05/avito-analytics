@@ -9,12 +9,21 @@ from schemas.matrices import MatrixCreateRequest
 
 async def get_matrices(session: AsyncSession) -> List[Matrix]:
     result = await session.execute(select(Matrix))
-    return [Matrix(res) for res in result.scalars().all()]
+    return [Matrix(
+        id=res.id,
+        name=res.name,
+        segment_id=res.segment_id,
+    ) for res in result.scalars().all()]
 
 
 async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
-    result = await session.execute(select(Matrix).where(id=matrix_id))
-    return result.scalar()
+    result = await session.execute(select(Matrix).where(Matrix.id == matrix_id))
+    res = result.scalar()
+    return Matrix(
+        id=res.id,
+        name=res.name,
+        segment_id=res.segment_id
+    )
 
 
 async def add_matrix(session: AsyncSession, matrix: MatrixCreateRequest) -> Matrix:

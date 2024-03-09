@@ -11,18 +11,19 @@ router = APIRouter()
 
 
 @router.get("/prices/", tags=["prices"])
-async def read_prices(request: Optional[PriceReadRequest], session: AsyncSession = Depends(get_session)):
-    if request is None:  # if list was requested
-        prices = await get_prices(session)
-        return [PriceReadCreateResponse(
-            price=price.price,
-            matrix_id=price.matrix_id,
-            location_id=price.location_id,
-            category_id=price.category_id
-        ) for price in prices]
+async def read_prices(session: AsyncSession = Depends(get_session)):
+    prices = await get_prices(session)
+    return [PriceReadCreateResponse(
+        price=price.price,
+        matrix_id=price.matrix_id,
+        location_id=price.location_id,
+        category_id=price.category_id
+    ) for price in prices]
 
-    # if current price was requested
-    price = await get_price(session, request)
+
+@router.get("/prices/{category_id}/{location_id}/{matrix_id}", tags=["prices"])
+async def read_prices(category_id: int, location_id: int, matrix_id: int, session: AsyncSession = Depends(get_session)):
+    price = await get_price(session, PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id))
     return PriceReadCreateResponse(
         price=price.price,
         matrix_id=price.matrix_id,

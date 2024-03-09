@@ -9,12 +9,23 @@ from schemas.locations import LocationCreateRequest
 
 async def get_locations(session: AsyncSession) -> List[Location]:
     result = await session.execute(select(Location))
-    return [Location(res) for res in result.scalars().all()]
+    return [Location(
+        id=res.id,
+        key=res.key,
+        name=res.name,
+        parent_id=res.parent_id,
+    ) for res in result.scalars().all()]
 
 
 async def get_location(session: AsyncSession, location_id: int) -> Location:
-    result = await session.execute(select(Location).where(id=location_id))
-    return result.scalar()
+    result = await session.execute(select(Location).where(Location.id == location_id))
+    res = result.scalar()
+    return Location(
+        id=res.id,
+        key=res.key,
+        name=res.name,
+        parent_id=res.parent_id,
+    )
 
 
 async def add_location(session: AsyncSession, location: LocationCreateRequest) -> Location:
