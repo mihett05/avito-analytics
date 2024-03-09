@@ -1,10 +1,6 @@
 from pydantic import BaseModel
 
 
-class CategoryReadRequest(BaseModel):
-    id: int
-
-
 class CategoryCreateRequest(BaseModel):
     id: int
     name: str

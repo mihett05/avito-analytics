@@ -1,26 +1,23 @@
-from typing import List, Union
+from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.location import Location
-from schemas.locations import LocationCreateRequest, LocationReadRequest
+from schemas.locations import LocationCreateRequest
 
 
 async def get_locations(session: AsyncSession) -> List[Location]:
-    result = await session.execute(select(Location).order_by(Location.key.desc()))
+    result = await session.execute(select(Location))
     return [Location(res) for res in result.scalars().all()]
 
 
-async def get_location(session: AsyncSession, location_id: Union[int, LocationReadRequest]) -> Location:
-    if isinstance(location_id, LocationReadRequest):
-        location_id = location_id.id
-
+async def get_location(session: AsyncSession, location_id: int) -> Location:
     result = await session.execute(select(Location).where(id=location_id))
     return result.scalar()
 
 
-def add_location(session: AsyncSession, location: LocationCreateRequest) -> Location:
+async def add_location(session: AsyncSession, location: LocationCreateRequest) -> Location:
     parent = await get_location(session, location.parent_id)
     if parent is None:
         ...  # TODO add raising exception
@@ -29,4 +26,6 @@ def add_location(session: AsyncSession, location: LocationCreateRequest) -> Loca
     new_location.key = f'{parent.key}-{location.id}'
 
     session.add(new_location)
+    await session.commit()
+
     return new_location

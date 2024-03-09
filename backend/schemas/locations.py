@@ -1,10 +1,6 @@
 from pydantic import BaseModel
 
 
-class LocationReadRequest(BaseModel):
-    id: int
-
-
 class LocationCreateRequest(BaseModel):
     id: int
     name: str
