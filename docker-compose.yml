@@ -1,0 +1,25 @@
+services:
+  postgres:
+    container_name: database
+    image: postgres
+    restart: always
+    environment:
+      - ".env"
+    ports:
+      - "15432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  adminer:
+    links:
+      - "postgres:database"
+    container_name: adminer
+    image: adminer
+    restart: always
+    environment:
+      host: $DB_HOST
+    ports:
+      - 8080:8080
+
+volumes:
+  db-data:
