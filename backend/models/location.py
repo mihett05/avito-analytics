@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from models.engine import Base
 
 
-class Locations(Base):
+class Location(Base):
     __tablename__ = "locations"
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -3,20 +3,20 @@ from typing import List, Union
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.categories import Categories
+from models.category import Category
 from schemas.categories import CategoryCreateRequest, CategoryReadRequest
 
 
-async def get_categories(session: AsyncSession) -> List[Categories]:
-    result = await session.execute(select(Categories).order_by(Categories.key.desc()))
-    return [Categories(res) for res in result.scalars().all()]
+async def get_categories(session: AsyncSession) -> List[Category]:
+    result = await session.execute(select(Category).order_by(Category.key.desc()))
+    return [Category(res) for res in result.scalars().all()]
 
 
-async def get_category(session: AsyncSession, category_id: Union[int, CategoryReadRequest]) -> Categories:
+async def get_category(session: AsyncSession, category_id: Union[int, CategoryReadRequest]) -> Category:
     if isinstance(category_id, CategoryReadRequest):
         category_id = category_id.id
 
-    result = await session.execute(select(Categories).where(id=category_id))
+    result = await session.execute(select(Category).where(id=category_id))
     return result.scalar()
 
 
@@ -25,7 +25,7 @@ def add_category(session: AsyncSession, category: CategoryCreateRequest):
     if parent is None:
         ...  # TODO add raising exception
 
-    new_category = Categories(id=category.id, name=category.name, parent_id=category.parent_id)
+    new_category = Category(id=category.id, name=category.name, parent_id=category.parent_id)
     new_category.key = f'{parent.key}-{category.id}'
 
     session.add(new_category)
