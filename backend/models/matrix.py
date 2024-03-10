@@ -7,8 +7,8 @@ from models.engine import Base
 
 
 class MatrixTypeEnum(Enum):
-    BASE = 'BASE'
-    DISCOUNT = 'DISCOUNT'
+    BASE = "BASE"
+    DISCOUNT = "DISCOUNT"
 
 
 class Matrix(Base):
@@ -17,7 +17,10 @@ class Matrix(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     segment_id: Mapped[int] = mapped_column(nullable=True)
-    type: Mapped[ENUM] = mapped_column(ENUM(MatrixTypeEnum, name='matrix_type_enum', create_type=True),
-                                       nullable=False, default=MatrixTypeEnum.BASE)
+    type: Mapped[ENUM] = mapped_column(
+        ENUM(MatrixTypeEnum, name="matrix_type_enum", create_type=True),
+        nullable=False,
+        default=MatrixTypeEnum.BASE,
+    )
 
     prices = relationship("Price", back_populates="matrix")

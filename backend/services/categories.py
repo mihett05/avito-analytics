@@ -9,12 +9,15 @@ from schemas.categories import CategoryCreateRequest
 
 async def get_categories(session: AsyncSession) -> List[Category]:
     result = await session.execute(select(Category))
-    return [Category(
-        id=res.id,
-        key=res.key,
-        name=res.name,
-        parent_id=res.parent_id,
-    ) for res in result.scalars().all()]
+    return [
+        Category(
+            id=res.id,
+            key=res.key,
+            name=res.name,
+            parent_id=res.parent_id,
+        )
+        for res in result.scalars().all()
+    ]
 
 
 async def get_category(session: AsyncSession, category_id: int) -> Category:
@@ -28,13 +31,17 @@ async def get_category(session: AsyncSession, category_id: int) -> Category:
     )
 
 
-async def add_category(session: AsyncSession, category: CategoryCreateRequest) -> Category:
+async def add_category(
+    session: AsyncSession, category: CategoryCreateRequest
+) -> Category:
     parent = await get_category(session, category.parent_id)
     if parent is None:
         ...  # TODO add raising exception
 
-    new_category = Category(id=category.id, name=category.name, parent_id=category.parent_id)
-    new_category.key = f'{parent.key}-{category.id}'
+    new_category = Category(
+        id=category.id, name=category.name, parent_id=category.parent_id
+    )
+    new_category.key = f"{parent.key}-{category.id}"
 
     session.add(new_category)
     await session.commit()
