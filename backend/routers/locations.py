@@ -13,7 +13,7 @@ from services.locations import get_locations, get_location, add_location
 router = APIRouter()
 
 
-@router.get("/location/", tags=["locations"])
+@router.get("/location", tags=["locations"])
 async def read_locations(
     session: AsyncSession = Depends(get_session),
 ) -> List[LocationReadCreateResponse]:
@@ -42,7 +42,7 @@ async def read_location(
     )
 
 
-@router.post("/location/", tags=["locations"])
+@router.post("/location", tags=["locations"])
 async def create_locations(
     request: LocationCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> LocationReadCreateResponse:
@@ -62,6 +62,6 @@ async def upload_csv(file: UploadFile, session: AsyncSession):
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Duplicate nodes were found",
+            detail="Duplicate nodes were found or incorrect parent id's",
         )
     return Response()

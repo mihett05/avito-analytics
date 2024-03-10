@@ -10,7 +10,7 @@ from services.matrices import get_matrices, get_matrix, add_matrix
 router = APIRouter()
 
 
-@router.get("/matrix/", tags=["matrices"])
+@router.get("/matrix", tags=["matrices"])
 async def read_matrices(
     session: AsyncSession = Depends(get_session),
 ) -> List[MatrixReadCreateResponse]:

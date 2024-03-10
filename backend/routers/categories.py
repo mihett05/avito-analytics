@@ -62,6 +62,6 @@ async def upload_csv(file: UploadFile, session: AsyncSession):
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Duplicate nodes were found",
+            detail="Duplicate nodes were found or incorrect parent id's",
         )
     return Response()
