@@ -7,9 +7,9 @@ from starlette import status
 
 from deps.sql_session import get_session
 from models import Price
-from schemas.matrices import MatrixReadCreateResponse, MatrixCreateRequest
+from schemas.matrices import MatrixReadCreateResponse, MatrixCreateRequest, MatrixTypePydantic
 from services.matrices import get_matrices, get_matrix, add_matrix
-from services.nodes import add_nodes_pack
+from services.nodes import add_nodes_pack, add_prices
 
 router = APIRouter()
 
@@ -48,13 +48,18 @@ async def create_matrix(
         request: MatrixCreateRequest, file: UploadFile, session: AsyncSession = Depends(get_session)
 ) -> MatrixReadCreateResponse:
     try:
+        if request.segment_id is not None:
+            request.type = MatrixTypePydantic.DISCOUNT
+
         matrix = await add_matrix(session, request)  # add metadata
-        await add_nodes_pack(session, file, Price)  # add data
+        await add_prices(session, file, Price)  # add data
+
     except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
+
     return MatrixReadCreateResponse(
         id=matrix.id,
         name=matrix.name,

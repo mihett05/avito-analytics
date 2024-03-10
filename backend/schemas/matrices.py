@@ -12,7 +12,7 @@ class MatrixTypePydantic(str, Enum):
 class MatrixCreateRequest(BaseModel):
     id: int
     name: str
-    type: MatrixTypePydantic
+    type: MatrixTypePydantic = MatrixTypePydantic.BASE
     segment_id: Optional[int]
 
 
