@@ -1,21 +1,21 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, UploadFile, Response, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from services.nodes import add_nodes_pack
-from models.category import Category
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from deps.sql_session import get_session
+from models.category import Category
 from schemas.categories import CategoryCreateRequest, CategoryReadCreateResponse
 from services.categories import get_categories, get_category, add_category
+from services.nodes import add_nodes_pack
 
 router = APIRouter()
 
 
 @router.get("/category", tags=["categories"])
 async def read_categories(
-    session: AsyncSession = Depends(get_session),
+        session: AsyncSession = Depends(get_session),
 ) -> List[CategoryReadCreateResponse]:
     categories = await get_categories(session)
     return [
@@ -31,7 +31,7 @@ async def read_categories(
 
 @router.get("/category/{category_id}", tags=["categories"])
 async def read_category(
-    category_id: int, session: AsyncSession = Depends(get_session)
+        category_id: int, session: AsyncSession = Depends(get_session)
 ) -> CategoryReadCreateResponse:
     category = await get_category(session, category_id)
     return CategoryReadCreateResponse(
@@ -44,7 +44,7 @@ async def read_category(
 
 @router.post("/category", tags=["categories"])
 async def create_category(
-    request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)
+        request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> CategoryReadCreateResponse:
     try:
         category = await add_category(session, request)
@@ -62,7 +62,7 @@ async def create_category(
 
 
 @router.post("/category/csv")
-async def upload_csv(file: UploadFile, session: AsyncSession):
+async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_session)):
     try:
         await add_nodes_pack(session, file, Category)
     except IntegrityError as err:
@@ -70,4 +70,4 @@ async def upload_csv(file: UploadFile, session: AsyncSession):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
-    return Response()
+    return Response({'status': status.HTTP_200_OK})

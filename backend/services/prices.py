@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import select, Row
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.price import Price

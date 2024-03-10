@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_pagination import add_pagination
 
 from routers import api
 from models.engine import init_models
@@ -16,6 +17,7 @@ async def lifespan(*args):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(api)
+add_pagination(app)
 
 app.add_middleware(
     CORSMiddleware,

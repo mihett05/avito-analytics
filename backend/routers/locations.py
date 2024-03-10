@@ -1,14 +1,14 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from models.location import Location
-from services.nodes import add_nodes_pack
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from deps.sql_session import get_session
+from models.location import Location
 from schemas.locations import LocationCreateRequest, LocationReadCreateResponse
 from services.locations import get_locations, get_location, add_location
+from services.nodes import add_nodes_pack
 
 router = APIRouter()
 
@@ -63,7 +63,7 @@ async def create_location(
 
 
 @router.post("/location/csv")
-async def upload_csv(file: UploadFile, session: AsyncSession):
+async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_session)):
     try:
         await add_nodes_pack(session, file, Location)
     except IntegrityError as err:
@@ -71,4 +71,4 @@ async def upload_csv(file: UploadFile, session: AsyncSession):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
-    return Response()
+    return Response({'status': status.HTTP_200_OK})
