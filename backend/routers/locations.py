@@ -62,7 +62,7 @@ async def create_location(
     )
 
 
-@router.post("/location/csv")
+@router.post("/location/csv", tags=["locations"])
 async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_session)):
     try:
         await add_nodes_pack(session, file, Location)

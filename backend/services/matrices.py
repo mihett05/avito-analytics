@@ -12,6 +12,7 @@ async def get_matrices(session: AsyncSession) -> List[Matrix]:
     return [Matrix(
         id=res.id,
         name=res.name,
+        type=res.type,
         segment_id=res.segment_id,
     ) for res in result.scalars().all()]
 
@@ -22,6 +23,7 @@ async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
     return Matrix(
         id=res.id,
         name=res.name,
+        type=res.type,
         segment_id=res.segment_id
     )
 

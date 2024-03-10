@@ -61,7 +61,7 @@ async def create_category(
     )
 
 
-@router.post("/category/csv")
+@router.post("/category/csv", tags=["categories"])
 async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_session)):
     try:
         await add_nodes_pack(session, file, Category)
