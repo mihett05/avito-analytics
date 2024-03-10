@@ -56,12 +56,11 @@ async def create_price(
 ) -> PriceReadCreateResponse:
     try:
         price = await add_price(session, request)
-    except IntegrityError:
+    except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid parent id",
+            detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
-
     return PriceReadCreateResponse(
         price=price.price,
         matrix_id=price.matrix_id,

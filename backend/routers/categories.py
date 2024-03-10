@@ -48,10 +48,10 @@ async def create_category(
 ) -> CategoryReadCreateResponse:
     try:
         category = await add_category(session, request)
-    except IntegrityError:
+    except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid parent id",
+            detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
     return CategoryReadCreateResponse(
         id=category.id,
@@ -65,9 +65,9 @@ async def create_category(
 async def upload_csv(file: UploadFile, session: AsyncSession):
     try:
         await add_nodes_pack(session, file, Category)
-    except IntegrityError:
+    except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Duplicate nodes were found or incorrect parent id's",
+            detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
     return Response()

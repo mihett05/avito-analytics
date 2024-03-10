@@ -3,12 +3,13 @@ from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert
 
+from models.price import Price
 from models.category import Category
 from models.location import Location
 
 
 async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: type):
-    if model is not Category and model is not Location:
+    if model is not Category and model is not Location and model is not Price:
         raise ValueError("Invalid 'model' passed")
 
     data = [
