@@ -7,7 +7,7 @@ services:
       - ./.env
     hostname: postgres_database
     ports:
-      - 15432:5432
+      - 5432:5432
     volumes:
       - db-data:/var/lib/postgresql/data
 
@@ -32,7 +32,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - 15000:5000
+      - 5000:5000
 
 
 volumes:
