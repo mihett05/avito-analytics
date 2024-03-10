@@ -1,7 +1,7 @@
 import React from 'react';
 import { List, Datagrid, TextField } from 'react-admin'
 
-export const LocationsList = () => (
+export const CategoriesList = () => (
   <List>
       <Datagrid rowClick="edit">
           <TextField source="id" />
@@ -12,4 +12,4 @@ export const LocationsList = () => (
   </List>
 );
 
-export default LocationsList;
+export default CategoriesList;

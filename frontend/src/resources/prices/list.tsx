@@ -1,15 +1,15 @@
 import React from 'react';
 import { List, Datagrid, TextField } from 'react-admin'
 
-export const LocationsList = () => (
+export const PricesList = () => (
   <List>
       <Datagrid rowClick="edit">
           <TextField source="id" />
-          <TextField source="name" />
-          <TextField source="parent_id" />
-          <TextField source="key" />
+          <TextField source="location_id" />
+          <TextField source="category_id" />
+          <TextField source="price" />
       </Datagrid>
   </List>
 );
 
-export default LocationsList;
+export default PricesList;
