@@ -1,6 +1,7 @@
 from typing import List
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.category import Category
@@ -36,7 +37,7 @@ async def add_category(
 ) -> Category:
     parent = await get_category(session, category.parent_id)
     if parent is None:
-        ...  # TODO add raising exception
+        raise ValueError('Invalid parent id')
 
     new_category = Category(
         id=category.id, name=category.name, parent_id=category.parent_id

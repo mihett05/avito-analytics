@@ -31,7 +31,7 @@ async def get_location(session: AsyncSession, location_id: int) -> Location:
 async def add_location(session: AsyncSession, location: LocationCreateRequest) -> Location:
     parent = await get_location(session, location.parent_id)
     if parent is None:
-        ...  # TODO add raising exception
+        raise ValueError('Invalid parent id')
 
     new_location = Location(id=location.id, name=location.name, parent_id=location.parent_id)
     new_location.key = f'{parent.key}-{location.id}'

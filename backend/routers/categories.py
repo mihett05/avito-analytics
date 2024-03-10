@@ -48,7 +48,7 @@ async def create_category(
 ) -> CategoryReadCreateResponse:
     try:
         category = await add_category(session, request)
-    except IntegrityError as err:
+    except (IntegrityError, ValueError) as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid parent id\nMore info:\n\n{err}",

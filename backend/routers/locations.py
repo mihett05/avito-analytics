@@ -48,7 +48,7 @@ async def create_location(
 ) -> LocationReadCreateResponse:
     try:
         location = await add_location(session, request)
-    except IntegrityError as err:
+    except (IntegrityError, ValueError) as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid parent id\nMore info:\n\n{err}",
