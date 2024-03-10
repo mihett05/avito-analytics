@@ -1,7 +1,6 @@
-import csv
 from typing import List
 
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from deps.sql_session import get_session
