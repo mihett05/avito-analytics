@@ -1,7 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from deps.sql_session import get_session
 from schemas.prices import PriceReadCreateResponse, PriceReadRequest, PriceCreateRequest
@@ -52,7 +54,14 @@ async def read_prices(
 async def create_price(
     request: PriceCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> PriceReadCreateResponse:
-    price = await add_price(session, request)
+    try:
+        price = await add_price(session, request)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid parent id",
+        )
+
     return PriceReadCreateResponse(
         price=price.price,
         matrix_id=price.matrix_id,

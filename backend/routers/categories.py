@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, UploadFile, Response, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from services.nodes import read_and_add_nodes
+from services.nodes import add_nodes_pack
 from models.category import Category
 
 from deps.sql_session import get_session
@@ -43,10 +43,16 @@ async def read_category(
 
 
 @router.post("/category", tags=["categories"])
-async def create_categories(
+async def create_category(
     request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> CategoryReadCreateResponse:
-    category = await add_category(session, request)
+    try:
+        category = await add_category(session, request)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid parent id",
+        )
     return CategoryReadCreateResponse(
         id=category.id,
         key=category.key,
@@ -58,7 +64,7 @@ async def create_categories(
 @router.post("/category/csv")
 async def upload_csv(file: UploadFile, session: AsyncSession):
     try:
-        await read_and_add_nodes(session, file, Category)
+        await add_nodes_pack(session, file, Category)
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

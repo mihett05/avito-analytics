@@ -1,7 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from deps.sql_session import get_session
 from schemas.matrices import MatrixReadCreateResponse, MatrixCreateRequest
@@ -40,10 +42,16 @@ async def read_matrix(
 
 
 @router.post("/matrix", tags=["matrices"])
-async def create_matrices(
+async def create_matrix(
     request: MatrixCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> MatrixReadCreateResponse:
-    matrix = await add_matrix(session, request)
+    try:
+        matrix = await add_matrix(session, request)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid parent id",
+        )
     return MatrixReadCreateResponse(
         id=matrix.id,
         name=matrix.name,

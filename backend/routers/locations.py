@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, sta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from models.location import Location
-from services.nodes import read_and_add_nodes
+from services.nodes import add_nodes_pack
 
 from deps.sql_session import get_session
 from schemas.locations import LocationCreateRequest, LocationReadCreateResponse
@@ -43,10 +43,17 @@ async def read_location(
 
 
 @router.post("/location", tags=["locations"])
-async def create_locations(
+async def create_location(
     request: LocationCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> LocationReadCreateResponse:
-    location = await add_location(session, request)
+    try:
+        location = await add_location(session, request)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid parent id",
+        )
+
     return LocationReadCreateResponse(
         id=location.id,
         key=location.key,
@@ -58,7 +65,7 @@ async def create_locations(
 @router.post("/location/csv")
 async def upload_csv(file: UploadFile, session: AsyncSession):
     try:
-        await read_and_add_nodes(session, file, Location)
+        await add_nodes_pack(session, file, Location)
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
