@@ -10,41 +10,52 @@ from services.prices import get_prices, get_price, add_price
 router = APIRouter()
 
 
-@router.get("/price/", tags=["prices"])
-async def read_prices(session: AsyncSession = Depends(get_session)) -> List[PriceReadCreateResponse]:
+@router.get("/price", tags=["prices"])
+async def read_prices(
+    session: AsyncSession = Depends(get_session),
+) -> List[PriceReadCreateResponse]:
     prices = await get_prices(session)
-    return [PriceReadCreateResponse(
-        price=price.price,
-        matrix_id=price.matrix_id,
-        location_id=price.location_id,
-        category_id=price.category_id
-    ) for price in prices]
+    return [
+        PriceReadCreateResponse(
+            price=price.price,
+            matrix_id=price.matrix_id,
+            location_id=price.location_id,
+            category_id=price.category_id,
+        )
+        for price in prices
+    ]
 
 
 @router.get("/price/{category_id}/{location_id}/{matrix_id}", tags=["prices"])
-async def read_prices(category_id: int,
-                      location_id: int,
-                      matrix_id: int,
-                      session: AsyncSession = Depends(get_session)) -> PriceReadCreateResponse:
-    price = await get_price(session, PriceReadRequest(category_id=category_id,
-                                                      location_id=location_id,
-                                                      matrix_id=matrix_id))
+async def read_prices(
+    category_id: int,
+    location_id: int,
+    matrix_id: int,
+    session: AsyncSession = Depends(get_session),
+) -> PriceReadCreateResponse:
+    price = await get_price(
+        session,
+        PriceReadRequest(
+            category_id=category_id, location_id=location_id, matrix_id=matrix_id
+        ),
+    )
 
     return PriceReadCreateResponse(
         price=price.price,
         matrix_id=price.matrix_id,
         location_id=price.location_id,
-        category_id=price.category_id
+        category_id=price.category_id,
     )
 
 
-@router.post("/price/", tags=["prices"])
-async def create_price(request: PriceCreateRequest,
-                       session: AsyncSession = Depends(get_session)) -> PriceReadCreateResponse:
+@router.post("/price", tags=["prices"])
+async def create_price(
+    request: PriceCreateRequest, session: AsyncSession = Depends(get_session)
+) -> PriceReadCreateResponse:
     price = await add_price(session, request)
     return PriceReadCreateResponse(
         price=price.price,
         matrix_id=price.matrix_id,
         location_id=price.location_id,
-        category_id=price.category_id
+        category_id=price.category_id,
     )
