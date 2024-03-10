@@ -8,7 +8,12 @@ from schemas.prices import PriceCreateRequest, PriceReadRequest
 
 
 async def get_prices(session: AsyncSession) -> List[Price]:
-    result = await session.execute(select(Price))
+    result = await session.execute(select(Price).order_by(
+        Price.category_id,
+        Price.location_id,
+        Price.matrix_id
+    ).limit(100))
+
     return [Price(
         price=res.price,
         matrix_id=res.matrix_id,

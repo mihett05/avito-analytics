@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy.exc import IntegrityError
@@ -45,14 +45,16 @@ async def read_matrix(
 
 @router.post("/matrix", tags=["matrices"])
 async def create_matrix(
-        request: MatrixCreateRequest, file: UploadFile, session: AsyncSession = Depends(get_session)
+        name: str, file: UploadFile, segment_id: Optional[int] = None, session: AsyncSession = Depends(get_session)
 ) -> MatrixReadCreateResponse:
     try:
-        if request.segment_id is not None:
-            request.type = MatrixTypePydantic.DISCOUNT
-
-        matrix = await add_matrix(session, request)  # add metadata
-        await add_prices(session, file, Price)  # add data
+        # cat loc price
+        matrix = await add_matrix(session, MatrixCreateRequest(
+            type=MatrixTypePydantic.DISCOUNT if segment_id is not None else MatrixTypePydantic.BASE,
+            name=name,
+            segment_id=segment_id
+        ))  # add metadata
+        await add_prices(session, file, Price, matrix)  # add data
 
     except IntegrityError as err:
         raise HTTPException(

@@ -8,7 +8,7 @@ from schemas.categories import CategoryCreateRequest
 
 
 async def get_categories(session: AsyncSession) -> List[Category]:
-    result = await session.execute(select(Category))
+    result = await session.execute(select(Category).order_by(Category.key).limit(100))
     return [
         Category(
             id=res.id,

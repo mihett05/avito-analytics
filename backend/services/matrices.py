@@ -8,7 +8,7 @@ from schemas.matrices import MatrixCreateRequest
 
 
 async def get_matrices(session: AsyncSession) -> List[Matrix]:
-    result = await session.execute(select(Matrix))
+    result = await session.execute(select(Matrix).order_by(Matrix.id).limit(100))
     return [Matrix(
         id=res.id,
         name=res.name,
@@ -29,7 +29,11 @@ async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
 
 
 async def add_matrix(session: AsyncSession, matrix: MatrixCreateRequest) -> Matrix:
-    new_matrix = Matrix(id=matrix.id, name=matrix.name)
+    new_matrix = Matrix(
+        name=matrix.name,
+        type=matrix.type,
+        segment_id=matrix.segment_id,
+    )
 
     session.add(new_matrix)
     await session.commit()

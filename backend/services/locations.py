@@ -8,7 +8,7 @@ from schemas.locations import LocationCreateRequest
 
 
 async def get_locations(session: AsyncSession) -> List[Location]:
-    result = await session.execute(select(Location))
+    result = await session.execute(select(Location).order_by(Location.key).limit(100))
     return [Location(
         id=res.id,
         key=res.key,

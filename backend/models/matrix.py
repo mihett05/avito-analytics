@@ -14,7 +14,7 @@ class MatrixTypeEnum(Enum):
 class Matrix(Base):
     __tablename__ = "matrices"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column()
     segment_id: Mapped[int] = mapped_column(nullable=True)
     type: Mapped[ENUM] = mapped_column(

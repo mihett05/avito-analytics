@@ -5,11 +5,17 @@ from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 
+from misc.chunk_generator import make_chunks
+from models import Matrix
 from models.price import Price
 from models.category import Category
 from models.location import Location
 from services.categories import get_categories
 from services.locations import get_locations
+
+
+def convector(data: bytes, separator=';'):
+    return [row.split(separator) for row in data.decode().strip().split()]
 
 
 async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Union[Location, Category]]):
@@ -25,7 +31,7 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
 
     new_data = [
         [col if col else None for col in row]
-        for row in csv.reader(await file.read())
+        for row in convector(await file.read())
     ]
 
     keys = ('id', 'name', 'parent_id')
@@ -40,18 +46,27 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
             raise ValueError('Invalid data was passed')
         obj['key'] = f'{obj["key"]}-{obj["id"]}'
 
-    await session.execute(insert(model).values(new_data).on_conflict_do_nothing())
+    for chunk in make_chunks(list(new_data.values())):
+        await session.execute(insert(model).values(chunk).on_conflict_do_nothing())
+
     await session.commit()
 
 
-async def add_prices(session: AsyncSession, file: UploadFile, model: type):
+async def add_prices(session: AsyncSession, file: UploadFile, model: type, matrix: Matrix):
     if model is not Price:
         raise ValueError("Invalid 'model' passed")
 
     data = [
-        [col if col else None for col in row]
-        for row in csv.reader(await file.read())
+        {
+            'price': int(row[2]),
+            'matrix_id': matrix.id,
+            'location_id': int(row[1]),
+            'category_id': int(row[0])
+        }
+        for row in convector(await file.read())
     ]
 
-    await session.execute(insert(model).values(data))
+    for chunk in make_chunks(data):
+        await session.execute(insert(model).values(chunk).on_conflict_do_nothing())
+
     await session.commit()
