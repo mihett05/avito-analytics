@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/category/", tags=["categories"])
-async def read_categories(session: AsyncSession = Depends(get_session)):
+async def read_categories(session: AsyncSession = Depends(get_session)) -> List[CategoryReadCreateResponse]:
     categories = await get_categories(session)
     return [CategoryReadCreateResponse(
         id=category.id,
@@ -20,7 +22,7 @@ async def read_categories(session: AsyncSession = Depends(get_session)):
 
 
 @router.get("/category/{category_id}", tags=["categories"])
-async def read_category(category_id: int, session: AsyncSession = Depends(get_session)):
+async def read_category(category_id: int, session: AsyncSession = Depends(get_session)) -> CategoryReadCreateResponse:
     category = await get_category(session, category_id)
     return CategoryReadCreateResponse(
         id=category.id,
@@ -31,7 +33,7 @@ async def read_category(category_id: int, session: AsyncSession = Depends(get_se
 
 
 @router.post("/category/", tags=["categories"])
-async def create_categories(request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)):
+async def create_categories(request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)) -> CategoryReadCreateResponse:
     category = await add_category(session, request)
     return CategoryReadCreateResponse(
         id=category.id,

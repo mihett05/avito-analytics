@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/location/", tags=["locations"])
-async def read_locations(session: AsyncSession = Depends(get_session)):
+async def read_locations(session: AsyncSession = Depends(get_session)) -> List[LocationReadCreateResponse]:
     locations = await get_locations(session)
     return [LocationReadCreateResponse(
         id=location.id,
@@ -20,7 +22,8 @@ async def read_locations(session: AsyncSession = Depends(get_session)):
 
 
 @router.get("/location/{location_id}", tags=["locations"])
-async def read_location(location_id: int, session: AsyncSession = Depends(get_session)):
+async def read_location(location_id: int,
+                        session: AsyncSession = Depends(get_session)) -> LocationReadCreateResponse:
     location = await get_location(session, location_id)
     return LocationReadCreateResponse(
         id=location.id,
@@ -31,7 +34,8 @@ async def read_location(location_id: int, session: AsyncSession = Depends(get_se
 
 
 @router.post("/location/", tags=["locations"])
-async def create_locations(request: LocationCreateRequest, session: AsyncSession = Depends(get_session)):
+async def create_locations(request: LocationCreateRequest,
+                           session: AsyncSession = Depends(get_session)) -> LocationReadCreateResponse:
     location = await add_location(session, request)
     return LocationReadCreateResponse(
         id=location.id,

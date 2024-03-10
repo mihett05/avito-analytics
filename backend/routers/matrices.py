@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/matrix/", tags=["matrices"])
-async def read_matrices(session: AsyncSession = Depends(get_session)):
+async def read_matrices(session: AsyncSession = Depends(get_session)) -> List[MatrixReadCreateResponse]:
     matrices = await get_matrices(session)
     return [MatrixReadCreateResponse(
         id=matrix.id,
@@ -19,7 +21,8 @@ async def read_matrices(session: AsyncSession = Depends(get_session)):
 
 
 @router.get("/matrix/{matrix_id}", tags=["matrices"])
-async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_session)):
+async def read_matrix(matrix_id: int,
+                      session: AsyncSession = Depends(get_session)) -> MatrixReadCreateResponse:
     matrix = await get_matrix(session, matrix_id)
     return MatrixReadCreateResponse(
         id=matrix.id,
@@ -29,7 +32,8 @@ async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_sessio
 
 
 @router.post("/matrix/", tags=["matrices"])
-async def create_matrices(request: MatrixCreateRequest, session: AsyncSession = Depends(get_session)):
+async def create_matrices(request: MatrixCreateRequest,
+                          session: AsyncSession = Depends(get_session)) -> MatrixReadCreateResponse:
     matrix = await add_matrix(session, request)
     return MatrixReadCreateResponse(
         id=matrix.id,
@@ -39,5 +43,5 @@ async def create_matrices(request: MatrixCreateRequest, session: AsyncSession = 
 
 
 @router.patch("/matrix/{matrix_id}", tags=["matrices"])
-async def update_matrix(matrix_id: int, session: AsyncSession = Depends(get_session)):
+async def update_matrix(matrix_id: int, session: AsyncSession = Depends(get_session)) -> MatrixReadCreateResponse:
     pass

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/prices/", tags=["prices"])
-async def read_prices(session: AsyncSession = Depends(get_session)):
+async def read_prices(session: AsyncSession = Depends(get_session)) -> List[PriceReadCreateResponse]:
     prices = await get_prices(session)
     return [PriceReadCreateResponse(
         price=price.price,
@@ -22,8 +22,14 @@ async def read_prices(session: AsyncSession = Depends(get_session)):
 
 
 @router.get("/prices/{category_id}/{location_id}/{matrix_id}", tags=["prices"])
-async def read_prices(category_id: int, location_id: int, matrix_id: int, session: AsyncSession = Depends(get_session)):
-    price = await get_price(session, PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id))
+async def read_prices(category_id: int,
+                      location_id: int,
+                      matrix_id: int,
+                      session: AsyncSession = Depends(get_session)) -> PriceReadCreateResponse:
+    price = await get_price(session, PriceReadRequest(category_id=category_id,
+                                                      location_id=location_id,
+                                                      matrix_id=matrix_id))
+
     return PriceReadCreateResponse(
         price=price.price,
         matrix_id=price.matrix_id,
@@ -33,7 +39,8 @@ async def read_prices(category_id: int, location_id: int, matrix_id: int, sessio
 
 
 @router.post("/prices/", tags=["prices"])
-async def create_price(request: PriceCreateRequest, session: AsyncSession = Depends(get_session)):
+async def create_price(request: PriceCreateRequest,
+                       session: AsyncSession = Depends(get_session)) -> PriceReadCreateResponse:
     price = await add_price(session, request)
     return PriceReadCreateResponse(
         price=price.price,
