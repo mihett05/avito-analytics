@@ -13,9 +13,11 @@ router = APIRouter()
 @router.get("/matrix/", tags=["matrices"])
 async def read_matrices(session: AsyncSession = Depends(get_session)) -> List[MatrixReadCreateResponse]:
     matrices = await get_matrices(session)
+
     return [MatrixReadCreateResponse(
         id=matrix.id,
         name=matrix.name,
+        type=matrix.type,
         segment_id=matrix.segment_id,
     ) for matrix in matrices]
 
@@ -27,6 +29,7 @@ async def read_matrix(matrix_id: int,
     return MatrixReadCreateResponse(
         id=matrix.id,
         name=matrix.name,
+        type=matrix.type,
         segment_id=matrix.segment_id
     )
 
@@ -38,6 +41,7 @@ async def create_matrices(request: MatrixCreateRequest,
     return MatrixReadCreateResponse(
         id=matrix.id,
         name=matrix.name,
+        type=matrix.type,
         segment_id=matrix.segment_id
     )
 
