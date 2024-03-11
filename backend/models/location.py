@@ -13,5 +13,5 @@ class Location(Base):
     key: Mapped[str] = mapped_column()
     name: Mapped[str] = mapped_column()
 
-    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("locations.id"), nullable=True)
+    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("locations.id", ondelete="cascade"), nullable=True)
     prices = relationship("Price", back_populates="location")

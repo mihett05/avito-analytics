@@ -1,7 +1,6 @@
 from typing import List, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
-from sqlalchemy import delete
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
