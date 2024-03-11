@@ -48,7 +48,7 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
         obj['key'] = old_data.get(obj['parent_id'], None) or new_data.get(obj['parent_id'], {}).get('key')
         if obj['key'] is None and obj['parent_id'] is not None:
             raise ValueError('Invalid data was passed')
-        obj['key'] = f'{obj["key"]}-{obj["id"]}'
+        obj['key'] = f'{obj["id"]}-{obj["key"]}' if obj['parent_id'] is not None else str(obj['id'])
 
     for chunk in make_chunks(list(new_data.values())):
         await session.execute(insert(model).values(chunk).on_conflict_do_nothing())
