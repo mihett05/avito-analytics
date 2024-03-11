@@ -3,7 +3,7 @@ from fastapi import Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
-from deps.sql_session import get_session
+from deps.sql_session import get_sql_session
 
 
 class ModelTotalCount:
@@ -12,7 +12,7 @@ class ModelTotalCount:
 
     async def __call__(
         self,
-        session: Annotated[AsyncSession, Depends(get_session)],
+        session: Annotated[AsyncSession, Depends(get_sql_session)],
         response: Response,
     ) -> Any:
         response.headers.append("Access-Control-Expose-Headers", "X-Total-Count")
