@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.price import Price
 from schemas.prices import PriceCreateRequest, PriceGetResponse, PriceReadRequest
+from schemas.storage import StorageConfResponse
 from services.categories import get_category
 from services.locations import get_location
 from services.segments import get_segments_by_user_id
@@ -69,12 +70,11 @@ async def get_target_price(
         location_id: int,
         redis_session: Redis
 ) -> list[PriceGetResponse]:
-
     locations = list(map(int, (await get_location(session, location_id)).key.split("-")))
     categories = list(map(int, (await get_category(session, category_id)).key.split("-")))
 
     segments = await get_segments_by_user_id(user_id)
-    storage = await get_storage_conf(redis_session)
+    storage: StorageConfResponse = await get_storage_conf(redis_session)
 
     statement = text(
         """
