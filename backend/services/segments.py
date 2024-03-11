@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-def get_segments_by_user_id(user_id: int) -> Optional[list[int]]:
+async def get_segments_by_user_id(user_id: int) -> Optional[list[int]]:
     segments = {
         2100: [156, 278], 
         2200: [168, 290, 412], 
