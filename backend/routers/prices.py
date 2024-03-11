@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -6,15 +6,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from deps.sql_session import get_session
+from models import Price
 from schemas.prices import PriceReadCreateResponse, PriceReadRequest, PriceCreateRequest
+from services.nodes import delete_table
 from services.prices import get_prices, get_price, add_price
 
 router = APIRouter()
 
 
+@router.delete("/price", tags=["prices"])
+async def delete_all_prices(session: AsyncSession = Depends(get_session)) -> Dict:
+    await delete_table(session, Price)
+    return {"status": status.HTTP_200_OK}
+
+
 @router.get("/price", tags=["prices"])
 async def read_prices(
-    session: AsyncSession = Depends(get_session),
+        session: AsyncSession = Depends(get_session),
 ) -> List[PriceReadCreateResponse]:
     prices = await get_prices(session)
     return [
@@ -30,10 +38,10 @@ async def read_prices(
 
 @router.get("/price/{category_id}/{location_id}/{matrix_id}", tags=["prices"])
 async def read_prices(
-    category_id: int,
-    location_id: int,
-    matrix_id: int,
-    session: AsyncSession = Depends(get_session),
+        category_id: int,
+        location_id: int,
+        matrix_id: int,
+        session: AsyncSession = Depends(get_session),
 ) -> PriceReadCreateResponse:
     price = await get_price(
         session,
@@ -52,7 +60,7 @@ async def read_prices(
 
 @router.post("/price", tags=["prices"])
 async def create_price(
-    request: PriceCreateRequest, session: AsyncSession = Depends(get_session)
+        request: PriceCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> PriceReadCreateResponse:
     try:
         price = await add_price(session, request)

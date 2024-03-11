@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy.exc import IntegrityError
@@ -6,12 +6,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from deps.sql_session import get_session
-from models import Price
+from models import Price, Matrix
 from schemas.matrices import MatrixReadCreateResponse, MatrixCreateRequest, MatrixTypePydantic
 from services.matrices import get_matrices, get_matrix, add_matrix
-from services.nodes import add_nodes_pack, add_prices
+from services.nodes import add_prices, delete_table
 
 router = APIRouter()
+
+
+@router.delete("/matrix", tags=["matrices"])
+async def delete_all_matrices(session: AsyncSession = Depends(get_session)) -> Dict:
+    await delete_table(session, Matrix)
+    return {"status": status.HTTP_200_OK}
 
 
 @router.get("/matrix", tags=["matrices"])

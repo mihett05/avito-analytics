@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from fastapi import APIRouter, Depends, UploadFile, Response, HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -8,9 +8,15 @@ from deps.sql_session import get_session
 from models.category import Category
 from schemas.categories import CategoryCreateRequest, CategoryReadCreateResponse
 from services.categories import get_categories, get_category, add_category
-from services.nodes import add_nodes_pack
+from services.nodes import add_nodes_pack, delete_table
 
 router = APIRouter()
+
+
+@router.delete("/category", tags=["categories"])
+async def delete_all_categories(session: AsyncSession = Depends(get_session)) -> Dict:
+    await delete_table(session, Category)
+    return {"status": status.HTTP_200_OK}
 
 
 @router.get("/category", tags=["categories"])

@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
+from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,14 +9,20 @@ from deps.sql_session import get_session
 from models.location import Location
 from schemas.locations import LocationCreateRequest, LocationReadCreateResponse
 from services.locations import get_locations, get_location, add_location
-from services.nodes import add_nodes_pack
+from services.nodes import add_nodes_pack, delete_table
 
 router = APIRouter()
 
 
+@router.delete("/location", tags=["locations"])
+async def delete_all_locations(session: AsyncSession = Depends(get_session)) -> Dict:
+    await delete_table(session, Location)
+    return {"status": status.HTTP_200_OK}
+
+
 @router.get("/location", tags=["locations"])
 async def read_locations(
-    session: AsyncSession = Depends(get_session),
+        session: AsyncSession = Depends(get_session),
 ) -> List[LocationReadCreateResponse]:
     locations = await get_locations(session)
     return [
@@ -31,7 +38,7 @@ async def read_locations(
 
 @router.get("/location/{location_id}", tags=["locations"])
 async def read_location(
-    location_id: int, session: AsyncSession = Depends(get_session)
+        location_id: int, session: AsyncSession = Depends(get_session)
 ) -> LocationReadCreateResponse:
     location = await get_location(session, location_id)
     return LocationReadCreateResponse(
@@ -44,7 +51,7 @@ async def read_location(
 
 @router.post("/location", tags=["locations"])
 async def create_location(
-    request: LocationCreateRequest, session: AsyncSession = Depends(get_session)
+        request: LocationCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> LocationReadCreateResponse:
     try:
         location = await add_location(session, request)

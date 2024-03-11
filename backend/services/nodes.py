@@ -2,6 +2,7 @@ import csv
 from typing import Type, Union
 
 from fastapi import UploadFile
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 
@@ -19,6 +20,10 @@ def convector(data: bytes, separator=';'):
         [int(col) if col.isdigit() else col for col in row.replace('"', '').split(separator)]
         for row in data.decode().strip().split('\n')
     ]
+
+
+async def delete_table(session: AsyncSession, model: Type[Union[Category, Matrix, Location, Price]]):
+    await session.execute(delete(Category))
 
 
 async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Union[Location, Category]]):

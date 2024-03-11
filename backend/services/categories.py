@@ -32,7 +32,7 @@ async def get_category(session: AsyncSession, category_id: int) -> Category:
 
 
 async def add_category(
-    session: AsyncSession, category: CategoryCreateRequest
+        session: AsyncSession, category: CategoryCreateRequest
 ) -> Category:
     parent = await get_category(session, category.parent_id)
     if parent is None:
