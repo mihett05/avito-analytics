@@ -23,7 +23,7 @@ def convector(data: bytes, separator=';'):
 
 
 async def delete_table(session: AsyncSession, model: Type[Union[Category, Matrix, Location, Price]]):
-    await session.execute(delete(Category))
+    await session.execute(delete(model))
     await session.commit()
 
 
@@ -42,7 +42,6 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
         [col if col else None for col in row]
         for row in convector(await file.read())
     ]
-    # print(new_data)
 
     keys = ('id', 'name', 'parent_id')
     new_data = {
