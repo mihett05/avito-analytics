@@ -52,6 +52,19 @@ async def read_matrix(
     )
 
 
+@router.delete("/matrix/{matrix_id}")
+async def delete_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_session)):
+    try:
+        await delete_matrix_by_id(session, matrix_id)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Matrix wasn't found",
+        )
+
+    return {"status": status.HTTP_200_OK}
+
+
 @router.post("/matrix")
 async def create_matrix(
         name: str,
@@ -84,16 +97,3 @@ async def create_matrix(
     return MatrixReadCreateResponse(
         id=matrix.id, name=matrix.name, type=matrix.type, segment_id=matrix.segment_id
     )
-
-
-@router.delete("/matrix/{matrix_id}")
-async def create_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_session)):
-    try:
-        await delete_matrix_by_id(session, matrix_id)
-    except IntegrityError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Matrix wasn't found",
-        )
-
-    return {"status": status.HTTP_200_OK}
