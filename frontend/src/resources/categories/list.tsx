@@ -5,9 +5,9 @@ export const CategoriesList = () => (
   <List>
       <Datagrid rowClick="edit">
           <TextField source="id" />
+          <TextField source="key" />
           <TextField source="name" />
           <TextField source="parent_id" />
-          <TextField source="key" />
       </Datagrid>
   </List>
 );

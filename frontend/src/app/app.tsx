@@ -6,15 +6,15 @@ import CategoriesList from '~/resources/categories/list';
 import PricesList from '~/resources/prices/list';
 import MatriciesList from '~/resources/matricies/list';
 
-const dataProvider = jsonServerProvider('http://localhost:4200'); // На нём бд была развернута :)
+const dataProvider = jsonServerProvider('https://avito.inter-choice.ru');
 
 function App() {
   return (
     <Admin dataProvider={dataProvider}>
-      <Resource name="locations" list={ LocationsList } edit={ EditGuesser } show={ ShowGuesser } />
-      <Resource name="categories" list={ CategoriesList } edit={ EditGuesser } show={ ShowGuesser } />
-      <Resource name="prices" list={ PricesList } edit={ EditGuesser } show={ ShowGuesser } />
-      <Resource name="matricies" list={ MatriciesList } edit={ EditGuesser } show={ ShowGuesser } />
+      <Resource name="location" list={ LocationsList } edit={ EditGuesser } show={ ShowGuesser } />
+      <Resource name="category" list={ CategoriesList } edit={ EditGuesser } show={ ShowGuesser } />
+      <Resource name="price" list={ PricesList } edit={ EditGuesser } show={ ShowGuesser } />
+      <Resource name="matrix" list={ MatriciesList } edit={ EditGuesser } show={ ShowGuesser } />
     </Admin>
   );
 }

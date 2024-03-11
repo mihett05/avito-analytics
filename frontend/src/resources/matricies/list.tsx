@@ -6,8 +6,8 @@ export const MatriciesList = () => (
       <Datagrid rowClick="edit">
           <TextField source="id" />
           <TextField source="name" />
-          <TextField source="parent_id" />
-          <TextField source="key" />
+          <TextField source="type" />
+          <TextField source="segment_id" />
       </Datagrid>
   </List>
 );
