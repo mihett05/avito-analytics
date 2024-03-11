@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.matrix import Matrix
@@ -39,3 +39,8 @@ async def add_matrix(session: AsyncSession, matrix: MatrixCreateRequest) -> Matr
     await session.commit()
 
     return new_matrix
+
+
+async def delete_matrix_by_id(session: AsyncSession, matrix_id: int):
+    await session.execute(delete(Matrix).where(Matrix.id == matrix_id))
+    await session.commit()
