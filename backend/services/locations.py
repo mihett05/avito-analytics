@@ -9,12 +9,15 @@ from schemas.locations import LocationCreateRequest
 
 async def get_locations(session: AsyncSession) -> List[Location]:
     result = await session.execute(select(Location).order_by(Location.key).limit(100))
-    return [Location(
-        id=res.id,
-        key=res.key,
-        name=res.name,
-        parent_id=res.parent_id,
-    ) for res in result.scalars().all()]
+    return [
+        Location(
+            id=res.id,
+            key=res.key,
+            name=res.name,
+            parent_id=res.parent_id,
+        )
+        for res in result.scalars().all()
+    ]
 
 
 async def get_location(session: AsyncSession, location_id: int) -> Location:
@@ -28,13 +31,17 @@ async def get_location(session: AsyncSession, location_id: int) -> Location:
     )
 
 
-async def add_location(session: AsyncSession, location: LocationCreateRequest) -> Location:
+async def add_location(
+    session: AsyncSession, location: LocationCreateRequest
+) -> Location:
     parent = await get_location(session, location.parent_id)
     if parent is None:
-        raise ValueError('Invalid parent id')
+        raise ValueError("Invalid parent id")
 
-    new_location = Location(id=location.id, name=location.name, parent_id=location.parent_id)
-    new_location.key = f'{parent.key}-{location.id}'
+    new_location = Location(
+        id=location.id, name=location.name, parent_id=location.parent_id
+    )
+    new_location.key = f"{parent.key}-{location.id}"
 
     session.add(new_location)
     await session.commit()

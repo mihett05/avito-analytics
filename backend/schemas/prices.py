@@ -21,3 +21,16 @@ class PriceReadCreateResponse(BaseModel):
     matrix_id: int
     location_id: int
     category_id: int
+
+
+class PriceGetRequest(BaseModel):
+    location_id: int
+    category_id: int
+    user_id: int
+
+
+class PriceGetResponse(BaseModel):
+    location_id: int
+    category_id: int
+    matrix_id: int
+    price: float

@@ -7,22 +7,40 @@ from starlette import status
 
 from deps.sql_session import get_session
 from models import Price
-from schemas.prices import PriceReadCreateResponse, PriceReadRequest, PriceCreateRequest
+from schemas.prices import (
+    PriceReadCreateResponse,
+    PriceReadRequest,
+    PriceCreateRequest,
+    PriceGetRequest,
+    PriceGetResponse,
+)
 from services.nodes import delete_table
-from services.prices import get_prices, get_price, add_price
+from services.prices import get_prices, get_price, add_price, get_target_price
 
-router = APIRouter()
+router = APIRouter(tags=["prices"])
 
 
-@router.delete("/price", tags=["prices"])
+@router.post("/price/target")
+async def calcualte_target_price(
+    body: PriceGetRequest, session: AsyncSession = Depends(get_session)
+):
+    return await get_target_price(
+        session=session,
+        category_id=body.category_id,
+        location_id=body.location_id,
+        user_id=body.user_id,
+    )
+
+
+@router.delete("/price")
 async def delete_all_prices(session: AsyncSession = Depends(get_session)) -> Dict:
     await delete_table(session, Price)
     return {"status": status.HTTP_200_OK}
 
 
-@router.get("/price", tags=["prices"])
+@router.get("/price")
 async def read_prices(
-        session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> List[PriceReadCreateResponse]:
     prices = await get_prices(session)
     return [
@@ -36,12 +54,12 @@ async def read_prices(
     ]
 
 
-@router.get("/price/{category_id}/{location_id}/{matrix_id}", tags=["prices"])
-async def read_prices(
-        category_id: int,
-        location_id: int,
-        matrix_id: int,
-        session: AsyncSession = Depends(get_session),
+@router.get("/price/{category_id}/{location_id}/{matrix_id}")
+async def read_price(
+    category_id: int,
+    location_id: int,
+    matrix_id: int,
+    session: AsyncSession = Depends(get_session),
 ) -> PriceReadCreateResponse:
     price = await get_price(
         session,
@@ -58,9 +76,9 @@ async def read_prices(
     )
 
 
-@router.post("/price", tags=["prices"])
+@router.post("/price")
 async def create_price(
-        request: PriceCreateRequest, session: AsyncSession = Depends(get_session)
+    request: PriceCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> PriceReadCreateResponse:
     try:
         price = await add_price(session, request)
