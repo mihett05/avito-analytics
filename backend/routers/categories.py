@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from deps.sql_session import get_session
+from deps.sql_session import get_sql_session
 from models.category import Category
 from schemas.categories import CategoryCreateRequest, CategoryReadCreateResponse
 from services.categories import get_categories, get_category, add_category
@@ -14,14 +14,14 @@ router = APIRouter(tags=["categories"])
 
 
 @router.delete("/category")
-async def delete_all_categories(session: AsyncSession = Depends(get_session)) -> Dict:
+async def delete_all_categories(session: AsyncSession = Depends(get_sql_session)) -> Dict:
     await delete_table(session, Category)
     return {"status": status.HTTP_200_OK}
 
 
 @router.get("/category")
 async def read_categories(
-        session: AsyncSession = Depends(get_session),
+        session: AsyncSession = Depends(get_sql_session),
 ) -> List[CategoryReadCreateResponse]:
     categories = await get_categories(session)
     return [
@@ -37,7 +37,7 @@ async def read_categories(
 
 @router.get("/category/{category_id}")
 async def read_category(
-        category_id: int, session: AsyncSession = Depends(get_session)
+        category_id: int, session: AsyncSession = Depends(get_sql_session)
 ) -> CategoryReadCreateResponse:
     category = await get_category(session, category_id)
     return CategoryReadCreateResponse(
@@ -50,7 +50,7 @@ async def read_category(
 
 @router.post("/category")
 async def create_category(
-        request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)
+        request: CategoryCreateRequest, session: AsyncSession = Depends(get_sql_session)
 ) -> CategoryReadCreateResponse:
     try:
         category = await add_category(session, request)
@@ -68,7 +68,7 @@ async def create_category(
 
 
 @router.post("/category/csv")
-async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_session)):
+async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sql_session)):
     try:
         await add_nodes_pack(session, file, Category)
     except IntegrityError as err:

@@ -14,6 +14,6 @@ class RedisConnectionOpener:
         await self.client.aclose()
 
 
-async def get_session() -> Redis:
+async def get_redis_session() -> Redis:
     async with RedisConnectionOpener() as client:
         yield client

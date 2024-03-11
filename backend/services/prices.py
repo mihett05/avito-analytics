@@ -1,5 +1,6 @@
 from typing import List
 
+from redis.asyncio import Redis
 from sqlalchemy import select, text, bindparam
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +9,7 @@ from schemas.prices import PriceCreateRequest, PriceGetResponse, PriceReadReques
 from services.categories import get_category
 from services.locations import get_location
 from services.segments import get_segments_by_user_id
+from storage.engine import get_storage_conf
 
 
 async def get_prices(session: AsyncSession) -> List[Price]:
@@ -61,19 +63,19 @@ async def add_price(session: AsyncSession, price: PriceCreateRequest) -> Price:
 
 
 async def get_target_price(
-    session: AsyncSession,
-    category_id: int,
-    location_id: int,
-    user_id: int,
+        session: AsyncSession,
+        user_id: int,
+        category_id: int,
+        location_id: int,
+        redis_session: Redis
 ) -> list[PriceGetResponse]:
-    locations = list(
-        map(int, (await get_location(session, location_id)).key.split("-"))
-    )
-    categories = list(
-        map(int, (await get_category(session, category_id)).key.split("-"))
-    )
+
+    locations = list(map(int, (await get_location(session, location_id)).key.split("-")))
+    categories = list(map(int, (await get_category(session, category_id)).key.split("-")))
+
     segments = await get_segments_by_user_id(user_id)
-    # TODO: storage
+    storage = await get_storage_conf(redis_session)
+
     statement = text(
         """
         SELECT

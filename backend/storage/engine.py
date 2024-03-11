@@ -14,7 +14,7 @@ redis_url = f"redis://{config.REDIS_USER}:{config.REDIS_PASSWORD}@{config.REDIS_
 pool = redis.ConnectionPool.from_url(redis_url)
 
 
-async def get_conf(client: Redis) -> StorageConfResponse:
+async def get_storage_conf(client: Redis) -> StorageConfResponse:
     if not await client.get('baseline'):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
