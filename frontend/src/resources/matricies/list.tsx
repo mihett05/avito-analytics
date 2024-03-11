@@ -1,14 +1,14 @@
 import React from 'react';
-import { List, Datagrid, TextField } from 'react-admin'
+import { List, Datagrid, TextField } from 'react-admin';
 
 export const MatriciesList = () => (
   <List>
-      <Datagrid rowClick="edit">
-          <TextField source="id" />
-          <TextField source="name" />
-          <TextField source="type" />
-          <TextField source="segment_id" />
-      </Datagrid>
+    <Datagrid rowClick="edit">
+      <TextField source="id" />
+      <TextField source="name" />
+      <TextField source="type" />
+      <TextField source="segment_id" />
+    </Datagrid>
   </List>
 );
 
