@@ -1,8 +1,9 @@
-from typing import List, Dict
+from typing import List, Dict, Annotated
 
 from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from deps.pagination import ModelTotalCount
 
 from deps.sql_session import get_session
 from models.category import Category
@@ -21,7 +22,8 @@ async def delete_all_categories(session: AsyncSession = Depends(get_session)) ->
 
 @router.get("/category", tags=["categories"])
 async def read_categories(
-        session: AsyncSession = Depends(get_session),
+    total: Annotated[int, Depends(ModelTotalCount(Category))],
+    session: AsyncSession = Depends(get_session),
 ) -> List[CategoryReadCreateResponse]:
     categories = await get_categories(session)
     return [
@@ -37,7 +39,7 @@ async def read_categories(
 
 @router.get("/category/{category_id}", tags=["categories"])
 async def read_category(
-        category_id: int, session: AsyncSession = Depends(get_session)
+    category_id: int, session: AsyncSession = Depends(get_session)
 ) -> CategoryReadCreateResponse:
     category = await get_category(session, category_id)
     return CategoryReadCreateResponse(
@@ -50,7 +52,7 @@ async def read_category(
 
 @router.post("/category", tags=["categories"])
 async def create_category(
-        request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)
+    request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> CategoryReadCreateResponse:
     try:
         category = await add_category(session, request)
@@ -77,4 +79,4 @@ async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sessi
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
 
-    return {'status': status.HTTP_200_OK}
+    return {"status": status.HTTP_200_OK}

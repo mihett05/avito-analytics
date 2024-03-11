@@ -1,9 +1,10 @@
-from typing import List, Dict
+from typing import Annotated, List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+from deps.pagination import ModelTotalCount
 
 from deps.sql_session import get_session
 from models import Price
@@ -40,6 +41,7 @@ async def delete_all_prices(session: AsyncSession = Depends(get_session)) -> Dic
 
 @router.get("/price")
 async def read_prices(
+    total: Annotated[int, Depends(ModelTotalCount(Price))],
     session: AsyncSession = Depends(get_session),
 ) -> List[PriceReadCreateResponse]:
     prices = await get_prices(session)

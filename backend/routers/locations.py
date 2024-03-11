@@ -1,8 +1,9 @@
-from typing import List, Dict
+from typing import Annotated, List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from deps.pagination import ModelTotalCount
 
 from deps.sql_session import get_session
 from models.location import Location
@@ -21,7 +22,8 @@ async def delete_all_locations(session: AsyncSession = Depends(get_session)) -> 
 
 @router.get("/location", tags=["locations"])
 async def read_locations(
-        session: AsyncSession = Depends(get_session),
+    total: Annotated[int, Depends(ModelTotalCount(Location))],
+    session: AsyncSession = Depends(get_session),
 ) -> List[LocationReadCreateResponse]:
     locations = await get_locations(session)
     return [
@@ -37,7 +39,7 @@ async def read_locations(
 
 @router.get("/location/{location_id}", tags=["locations"])
 async def read_location(
-        location_id: int, session: AsyncSession = Depends(get_session)
+    location_id: int, session: AsyncSession = Depends(get_session)
 ) -> LocationReadCreateResponse:
     location = await get_location(session, location_id)
     return LocationReadCreateResponse(
@@ -50,7 +52,7 @@ async def read_location(
 
 @router.post("/location", tags=["locations"])
 async def create_location(
-        request: LocationCreateRequest, session: AsyncSession = Depends(get_session)
+    request: LocationCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> LocationReadCreateResponse:
     try:
         location = await add_location(session, request)
@@ -78,4 +80,4 @@ async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sessi
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
 
-    return {'status': status.HTTP_200_OK}
+    return {"status": status.HTTP_200_OK}
