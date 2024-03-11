@@ -10,16 +10,16 @@ from schemas.locations import LocationCreateRequest, LocationReadCreateResponse
 from services.locations import get_locations, get_location, add_location
 from services.nodes import add_nodes_pack, delete_table
 
-router = APIRouter()
+router = APIRouter(tags=["locations"])
 
 
-@router.delete("/location", tags=["locations"])
+@router.delete("/location")
 async def delete_all_locations(session: AsyncSession = Depends(get_session)) -> Dict:
     await delete_table(session, Location)
     return {"status": status.HTTP_200_OK}
 
 
-@router.get("/location", tags=["locations"])
+@router.get("/location")
 async def read_locations(
         session: AsyncSession = Depends(get_session),
 ) -> List[LocationReadCreateResponse]:
@@ -35,7 +35,7 @@ async def read_locations(
     ]
 
 
-@router.get("/location/{location_id}", tags=["locations"])
+@router.get("/location/{location_id}")
 async def read_location(
         location_id: int, session: AsyncSession = Depends(get_session)
 ) -> LocationReadCreateResponse:
@@ -48,7 +48,7 @@ async def read_location(
     )
 
 
-@router.post("/location", tags=["locations"])
+@router.post("/location")
 async def create_location(
         request: LocationCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> LocationReadCreateResponse:
@@ -68,7 +68,7 @@ async def create_location(
     )
 
 
-@router.post("/location/csv", tags=["locations"])
+@router.post("/location/csv")
 async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_session)):
     try:
         await add_nodes_pack(session, file, Location)

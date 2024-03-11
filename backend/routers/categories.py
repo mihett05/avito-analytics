@@ -10,16 +10,16 @@ from schemas.categories import CategoryCreateRequest, CategoryReadCreateResponse
 from services.categories import get_categories, get_category, add_category
 from services.nodes import add_nodes_pack, delete_table
 
-router = APIRouter()
+router = APIRouter(tags=["categories"])
 
 
-@router.delete("/category", tags=["categories"])
+@router.delete("/category")
 async def delete_all_categories(session: AsyncSession = Depends(get_session)) -> Dict:
     await delete_table(session, Category)
     return {"status": status.HTTP_200_OK}
 
 
-@router.get("/category", tags=["categories"])
+@router.get("/category")
 async def read_categories(
         session: AsyncSession = Depends(get_session),
 ) -> List[CategoryReadCreateResponse]:
@@ -35,7 +35,7 @@ async def read_categories(
     ]
 
 
-@router.get("/category/{category_id}", tags=["categories"])
+@router.get("/category/{category_id}")
 async def read_category(
         category_id: int, session: AsyncSession = Depends(get_session)
 ) -> CategoryReadCreateResponse:
@@ -48,7 +48,7 @@ async def read_category(
     )
 
 
-@router.post("/category", tags=["categories"])
+@router.post("/category")
 async def create_category(
         request: CategoryCreateRequest, session: AsyncSession = Depends(get_session)
 ) -> CategoryReadCreateResponse:
@@ -67,7 +67,7 @@ async def create_category(
     )
 
 
-@router.post("/category/csv", tags=["categories"])
+@router.post("/category/csv")
 async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_session)):
     try:
         await add_nodes_pack(session, file, Category)

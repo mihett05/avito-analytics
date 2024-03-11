@@ -12,7 +12,6 @@ from schemas.prices import (
     PriceReadRequest,
     PriceCreateRequest,
     PriceGetRequest,
-    PriceGetResponse,
 )
 from services.nodes import delete_table
 from services.prices import get_prices, get_price, add_price, get_target_price
