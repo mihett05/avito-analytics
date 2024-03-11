@@ -69,49 +69,52 @@ async def get_target_price(
         category_id: int,
         location_id: int,
         redis_session: Redis
-) -> list[PriceGetResponse]:
+) -> PriceGetResponse:
     locations = list(map(int, (await get_location(session, location_id)).key.split("-")))
     categories = list(map(int, (await get_category(session, category_id)).key.split("-")))
 
     segments = await get_segments_by_user_id(user_id)
     storage: StorageConfResponse = await get_storage_conf(redis_session)
 
+    ides = [storage.baseline] + storage.discounts
+
     statement = text(
         """
         SELECT
             prices.location_id, prices.category_id, prices.matrix_id, matrices.segment_id, prices.price
         FROM prices
-        INNER JOIN matrices ON
-            prices.matrix_id = matrices.id AND
+        INNER JOIN matrices ON prices.matrix_id = matrices.id
+        WHERE
             prices.location_id IN :locations AND
             prices.category_id IN :categories AND
-            matrices.segment_id IS NULL OR matrices.segment_id IN :segments
-        ORDER BY prices.category_id DESC, prices.location_id DESC
+            prices.matrix_id IN :ides AND
+            (matrices.segment_id IS NULL OR (matrices.segment_id IN :segments AND matrices.id in :ides))
+        ORDER BY prices.location_id DESC, prices.category_id DESC, matrices.type DESC;
         """
     )
     statement = (
         statement.bindparams(bindparam("locations", expanding=True))
         .bindparams(bindparam("categories", expanding=True))
         .bindparams(bindparam("segments", expanding=True))
+        .bindparams(bindparam("ides", expanding=True))
     )
 
-    rows = (
+    result = (
         await session.execute(
             statement,
             {
+                "ides": ides or [],
                 "locations": locations,
                 "categories": categories,
                 "segments": segments or [],
             },
         )
-    ).all()
-    result = [
-        PriceGetResponse(
-            location_id=location_id,
-            category_id=category_id,
-            matrix_id=matrix_id,
-            price=price,
+    ).first()  # .all()
+
+    return PriceGetResponse(
+            location_id=result[0],
+            category_id=result[1],
+            matrix_id=result[2],
+            segment_id=result[3],
+            price=result[4],
         )
-        for location_id, category_id, matrix_id, segment_id, price in rows
-    ]
-    return result
