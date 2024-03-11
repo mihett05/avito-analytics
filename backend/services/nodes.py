@@ -15,7 +15,10 @@ from services.locations import get_locations
 
 
 def convector(data: bytes, separator=';'):
-    return [row.split(separator) for row in data.decode().strip().split()]
+    return [
+        [int(col) if col.isdigit() else col for col in row.replace('"', '').split(separator)]
+        for row in data.decode().strip().split('\n')
+    ]
 
 
 async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Union[Location, Category]]):
@@ -33,6 +36,7 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
         [col if col else None for col in row]
         for row in convector(await file.read())
     ]
+    # print(new_data)
 
     keys = ('id', 'name', 'parent_id')
     new_data = {
@@ -40,9 +44,9 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
         for row in new_data
     }
 
-    for obj in new_data:
+    for k, obj in new_data.items():
         obj['key'] = old_data.get(obj['parent_id'], None) or new_data.get(obj['parent_id'], {}).get('key')
-        if obj['key'] is None:
+        if obj['key'] is None and obj['parent_id'] is not None:
             raise ValueError('Invalid data was passed')
         obj['key'] = f'{obj["key"]}-{obj["id"]}'
 

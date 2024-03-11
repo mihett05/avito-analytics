@@ -71,4 +71,4 @@ async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sessi
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
 
-    return Response({'status': status.HTTP_200_OK})
+    return {'status': status.HTTP_200_OK}

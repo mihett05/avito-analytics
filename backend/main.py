@@ -5,12 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 
 from routers import api
-from models.engine import init_models
 
 
 @asynccontextmanager
 async def lifespan(*args):
-    await init_models()
     yield
 
 
