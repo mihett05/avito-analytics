@@ -86,6 +86,7 @@ async def create_price(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
+
     return PriceReadCreateResponse(
         price=price.price,
         matrix_id=price.matrix_id,
