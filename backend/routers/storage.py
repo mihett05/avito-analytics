@@ -1,14 +1,7 @@
-from typing import List
-
-from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
-from sqlalchemy.exc import IntegrityError
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from deps.sql_session import get_session
-from models.location import Location
-from schemas.locations import LocationCreateRequest, LocationReadCreateResponse
-from services.locations import get_locations, get_location, add_location
-from services.nodes import add_nodes_pack
 
 router = APIRouter()
 

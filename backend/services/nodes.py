@@ -1,16 +1,15 @@
-import csv
 from typing import Type, Union
 
 from fastapi import UploadFile
 from sqlalchemy import delete
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from misc.chunk_generator import make_chunks
 from models import Matrix
-from models.price import Price
 from models.category import Category
 from models.location import Location
+from models.price import Price
 from services.categories import get_categories
 from services.locations import get_locations
 
