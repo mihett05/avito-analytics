@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from deps.pagination import ModelTotalCount
 
-from deps.sql_session import get_session
+from deps.sql_session import get_sql_session
 from models import Price, Matrix
 from schemas.matrices import (
     MatrixReadCreateResponse,
@@ -16,19 +16,19 @@ from schemas.matrices import (
 from services.matrices import get_matrices, get_matrix, add_matrix
 from services.nodes import add_prices, delete_table
 
-router = APIRouter()
+router = APIRouter(tags=["matrices"])
 
 
-@router.delete("/matrix", tags=["matrices"])
-async def delete_all_matrices(session: AsyncSession = Depends(get_session)) -> Dict:
+@router.delete("/matrix")
+async def delete_all_matrices(session: AsyncSession = Depends(get_sql_session)) -> Dict:
     await delete_table(session, Matrix)
     return {"status": status.HTTP_200_OK}
 
 
-@router.get("/matrix", tags=["matrices"])
+@router.get("/matrix")
 async def read_matrices(
-    total: Annotated[int, Depends(ModelTotalCount(Matrix))],
-    session: AsyncSession = Depends(get_session),
+        total: Annotated[int, Depends(ModelTotalCount(Matrix))],
+        session: AsyncSession = Depends(get_sql_session),
 ) -> List[MatrixReadCreateResponse]:
     matrices = await get_matrices(session)
     return [
@@ -42,9 +42,9 @@ async def read_matrices(
     ]
 
 
-@router.get("/matrix/{matrix_id}", tags=["matrices"])
+@router.get("/matrix/{matrix_id}")
 async def read_matrix(
-    matrix_id: int, session: AsyncSession = Depends(get_session)
+        matrix_id: int, session: AsyncSession = Depends(get_sql_session)
 ) -> MatrixReadCreateResponse:
     matrix = await get_matrix(session, matrix_id)
     return MatrixReadCreateResponse(
@@ -52,12 +52,12 @@ async def read_matrix(
     )
 
 
-@router.post("/matrix", tags=["matrices"])
+@router.post("/matrix")
 async def create_matrix(
     name: str,
     file: UploadFile,
     segment_id: Optional[int] = None,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_sql_session)
 ) -> MatrixReadCreateResponse:
     try:
         # cat loc price
@@ -84,10 +84,3 @@ async def create_matrix(
     return MatrixReadCreateResponse(
         id=matrix.id, name=matrix.name, type=matrix.type, segment_id=matrix.segment_id
     )
-
-
-@router.patch("/matrix/{matrix_id}", tags=["matrices"])
-async def update_matrix(
-    matrix_id: int, session: AsyncSession = Depends(get_session)
-) -> MatrixReadCreateResponse:
-    pass
