@@ -9,8 +9,12 @@ from models.category import Category
 from schemas.categories import CategoryCreateRequest
 
 
-async def get_categories(session: AsyncSession) -> List[Category]:
-    result = await session.execute(select(Category).order_by(Category.key).limit(100))
+async def get_categories(session: AsyncSession, start: int = None, end: int = None) -> List[Category]:
+    query = select(Category)
+    if start is not None and end is not None:
+        query = query.where(start <= Category.id, Category.id <= end)
+    result = await session.execute(query)
+
     return [
         Category(
             id=res.id,

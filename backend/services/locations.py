@@ -9,8 +9,12 @@ from models.location import Location
 from schemas.locations import LocationCreateRequest
 
 
-async def get_locations(session: AsyncSession) -> List[Location]:
-    result = await session.execute(select(Location).order_by(Location.key).limit(100))
+async def get_locations(session: AsyncSession, start: int = None, end: int = None) -> List[Location]:
+    query = select(Location)
+    if start is not None and end is not None:
+        query = query.where(start <= Location.id, Location.id <= end)
+    result = await session.execute(query)
+    print(query)
     return [
         Location(
             id=res.id,
@@ -36,7 +40,7 @@ async def get_location(session: AsyncSession, location_id: int) -> Location:
 
 
 async def add_location(
-    session: AsyncSession, location: LocationCreateRequest
+        session: AsyncSession, location: LocationCreateRequest
 ) -> Location:
     parent = await get_location(session, location.parent_id)
     if parent is None:

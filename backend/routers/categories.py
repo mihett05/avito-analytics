@@ -1,6 +1,7 @@
 from typing import List, Dict, Annotated
 
 from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
+from fastapi_pagination import add_pagination
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from deps.pagination import ModelTotalCount
@@ -23,9 +24,10 @@ async def delete_all_categories(session: AsyncSession = Depends(get_sql_session)
 @router.get("/category")
 async def read_categories(
         total: Annotated[int, Depends(ModelTotalCount(Category))],
+        _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[CategoryReadCreateResponse]:
-    categories = await get_categories(session)
+    categories = await get_categories(session, start=_start, end=_end)
     return [
         CategoryReadCreateResponse(
             id=category.id,

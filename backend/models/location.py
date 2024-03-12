@@ -8,7 +8,6 @@ from models.engine import Base
 
 class Location(Base):
     __tablename__ = "locations"
-
     id: Mapped[int] = mapped_column(primary_key=True)
     key: Mapped[str] = mapped_column()
     name: Mapped[str] = mapped_column()

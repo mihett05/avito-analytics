@@ -28,9 +28,10 @@ async def delete_all_matrices(session: AsyncSession = Depends(get_sql_session)) 
 @router.get("/matrix")
 async def read_matrices(
         total: Annotated[int, Depends(ModelTotalCount(Matrix))],
+        _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[MatrixReadCreateResponse]:
-    matrices = await get_matrices(session)
+    matrices = await get_matrices(session, start=_start, end=_end)
     return [
         MatrixReadCreateResponse(
             id=matrix.id,

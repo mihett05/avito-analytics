@@ -15,7 +15,6 @@ async def lifespan(*args):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(api)
-add_pagination(app)
 
 app.add_middleware(
     CORSMiddleware,
