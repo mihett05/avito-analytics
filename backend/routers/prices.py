@@ -14,7 +14,7 @@ from schemas.prices import (
     PriceReadCreateResponse,
     PriceReadRequest,
     PriceCreateRequest,
-    PriceGetRequest,
+    PriceGetRequest, PriceGetResponse,
 )
 from services.nodes import delete_table
 from services.prices import get_prices, get_price, add_price, get_target_price
@@ -27,7 +27,7 @@ async def calculate_target_price(
         request: PriceGetRequest,
         session: AsyncSession = Depends(get_sql_session),
         redis_session: Redis = Depends(get_redis_session)
-):
+) -> PriceGetResponse:
     return await get_target_price(
         session=session,
         user_id=request.user_id,
@@ -80,6 +80,27 @@ async def read_price(
         location_id=price.location_id,
         category_id=price.category_id,
     )
+
+
+@router.delete("/price/{category_id}/{location_id}/{matrix_id}")
+async def delete_price(
+        category_id: int,
+        location_id: int,
+        matrix_id: int,
+        session: AsyncSession = Depends(get_sql_session),
+):
+    try:
+        await delete_price(
+            session,
+            PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id)
+        )
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Price wasn't found",
+        )
+
+    return {"status": status.HTTP_200_OK}
 
 
 @router.post("/price")

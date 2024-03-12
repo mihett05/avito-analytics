@@ -30,7 +30,8 @@ class PriceGetRequest(BaseModel):
 
 
 class PriceGetResponse(BaseModel):
+    price: float
     location_id: int
     category_id: int
     matrix_id: int
-    price: float
+    segment_id: Optional[int] = None

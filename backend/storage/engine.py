@@ -1,4 +1,4 @@
-from typing import List, Union, Dict
+from typing import List
 
 import redis.asyncio as redis
 from fastapi import HTTPException

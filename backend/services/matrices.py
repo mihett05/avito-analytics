@@ -1,9 +1,11 @@
 from typing import List
 
+from fastapi import HTTPException
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
-from models.matrix import Matrix
+from models.matrix import Matrix, MatrixTypeEnum
 from schemas.matrices import MatrixCreateRequest
 
 
@@ -18,14 +20,26 @@ async def get_matrices(session: AsyncSession) -> List[Matrix]:
 
 
 async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
-    result = await session.execute(select(Matrix).where(Matrix.id == matrix_id))
-    res = result.scalar()
+    res = (await session.execute(select(Matrix).where(Matrix.id == matrix_id, Matrix.type == MatrixTypeEnum.DISCOUNT))).scalar()
+    if not res:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="matrix wasn't found")
+
     return Matrix(
         id=res.id,
         name=res.name,
         type=res.type,
         segment_id=res.segment_id
     )
+
+
+async def get_matrix__id_in(session: AsyncSession, discounts: List[int]) -> List[Matrix]:
+    result = await session.execute(select(Matrix).where(Matrix.id.in_(discounts)))
+    return [Matrix(
+        id=res.id,
+        name=res.name,
+        type=res.type,
+        segment_id=res.segment_id,
+    ) for res in result.scalars().all()]
 
 
 async def add_matrix(session: AsyncSession, matrix: MatrixCreateRequest) -> Matrix:
