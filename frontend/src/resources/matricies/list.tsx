@@ -3,7 +3,7 @@ import { List, Datagrid, TextField } from 'react-admin';
 
 export const MatriciesList = () => (
   <List>
-    <Datagrid rowClick="edit">
+    <Datagrid rowClick="show">
       <TextField source="id" />
       <TextField source="name" />
       <TextField source="type" />

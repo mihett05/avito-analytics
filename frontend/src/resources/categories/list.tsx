@@ -3,7 +3,7 @@ import { List, Datagrid, TextField } from 'react-admin';
 
 export const CategoriesList = () => (
   <List>
-    <Datagrid rowClick="edit">
+    <Datagrid rowClick="show">
       <TextField source="id" />
       <TextField source="key" />
       <TextField source="name" />
