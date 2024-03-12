@@ -1,8 +1,10 @@
 from typing import List
 
+from fastapi import HTTPException
 from redis.asyncio import Redis
 from sqlalchemy import select, text, bindparam, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from models.price import Price
 from schemas.prices import PriceCreateRequest, PriceGetResponse, PriceReadRequest
@@ -42,20 +44,21 @@ async def delete_price(session: AsyncSession, req: PriceReadRequest):
 
 
 async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
-    result = await session.execute(
+    result = (await session.execute(
         select(Price).where(
             Price.matrix_id == req.matrix_id,
             Price.location_id == req.location_id,
             Price.category_id == req.category_id,
         )
-    )
+    )).scalar()
+    if not result:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid price key")
 
-    res = result.scalar()
     return Price(
-        price=res.price,
-        matrix_id=res.matrix_id,
-        location_id=res.location_id,
-        category_id=res.category_id,
+        price=result.price,
+        matrix_id=result.matrix_id,
+        location_id=result.location_id,
+        category_id=result.category_id,
     )
 
 

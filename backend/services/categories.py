@@ -1,7 +1,9 @@
 from typing import List
 
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from models.category import Category
 from schemas.categories import CategoryCreateRequest
@@ -21,13 +23,15 @@ async def get_categories(session: AsyncSession) -> List[Category]:
 
 
 async def get_category(session: AsyncSession, category_id: int) -> Category:
-    result = await session.execute(select(Category).where(Category.id == category_id))
-    res = result.scalar()
+    result = (await session.execute(select(Category).where(Category.id == category_id))).scalar()
+    if not result:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid category id")
+
     return Category(
-        id=res.id,
-        key=res.key,
-        name=res.name,
-        parent_id=res.parent_id,
+        id=result.id,
+        key=result.key,
+        name=result.name,
+        parent_id=result.parent_id,
     )
 
 
