@@ -5,7 +5,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from models.matrix import Matrix
+from models.matrix import Matrix, MatrixTypeEnum
 from schemas.matrices import MatrixCreateRequest
 
 
@@ -20,7 +20,7 @@ async def get_matrices(session: AsyncSession) -> List[Matrix]:
 
 
 async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
-    res = (await session.execute(select(Matrix).where(Matrix.id == matrix_id))).scalar()
+    res = (await session.execute(select(Matrix).where(Matrix.id == matrix_id, Matrix.type == MatrixTypeEnum.DISCOUNT))).scalar()
     if not res:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="matrix wasn't found")
 
