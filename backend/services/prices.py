@@ -1,7 +1,7 @@
 from typing import List
 
 from redis.asyncio import Redis
-from sqlalchemy import select, text, bindparam
+from sqlalchemy import select, text, bindparam, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.price import Price
@@ -29,6 +29,16 @@ async def get_prices(session: AsyncSession) -> List[Price]:
         )
         for res in result.scalars().all()
     ]
+
+
+async def delete_price(session: AsyncSession, req: PriceReadRequest):
+    await session.execute(
+        delete(Price).where(
+            Price.matrix_id == req.matrix_id,
+            Price.location_id == req.location_id,
+            Price.category_id == req.category_id,
+        )
+    )
 
 
 async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
@@ -112,9 +122,9 @@ async def get_target_price(
     ).first()  # .all()
 
     return PriceGetResponse(
-            location_id=result[0],
-            category_id=result[1],
-            matrix_id=result[2],
-            segment_id=result[3],
-            price=result[4],
-        )
+        location_id=result[0],
+        category_id=result[1],
+        matrix_id=result[2],
+        segment_id=result[3],
+        price=result[4],
+    )
