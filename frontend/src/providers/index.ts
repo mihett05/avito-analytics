@@ -1,6 +1,6 @@
 import { combineDataProviders } from 'react-admin';
 
-import { restProvider } from './rest';
+import { jsonProvider } from './json';
 import { priceProvider } from './prices';
 
 export const dataProvider = combineDataProviders((resource) => {
@@ -8,6 +8,6 @@ export const dataProvider = combineDataProviders((resource) => {
     case 'price':
       return priceProvider;
     default:
-      return restProvider;
+      return jsonProvider;
   }
 });

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Price } from '~/entities';
 
 const base = axios.create({
-  baseURL: import.meta.url + '/price',
+  baseURL: import.meta.env.VITE_API_BASE,
 });
 
 type PriceResponse = Omit<Price, 'id'>;
@@ -17,8 +17,10 @@ const getId = ({
 
 export const priceProvider: DataProvider = {
   getList: async (resource, params): Promise<GetListResult<Price>> => {
+    const response = await base.get('/price');
+    console.log(response);
     return {
-      data: ((await base.get('/')).data as PriceResponse[]).map(
+      data: (response.data as PriceResponse[]).map(
         ({ category_id, location_id, matrix_id, price }: PriceResponse): Price => ({
           location_id,
           category_id,
@@ -27,6 +29,7 @@ export const priceProvider: DataProvider = {
           id: getId({ category_id, location_id, matrix_id }),
         }),
       ),
+      total: response.headers['X-Total-Count'],
     };
   },
 };
