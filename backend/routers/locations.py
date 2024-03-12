@@ -23,9 +23,11 @@ async def delete_all_locations(session: AsyncSession = Depends(get_sql_session))
 @router.get("/location")
 async def read_locations(
         total: Annotated[int, Depends(ModelTotalCount(Location))],
+        _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[LocationReadCreateResponse]:
-    locations = await get_locations(session)
+
+    locations = await get_locations(session, start=_start, end=_end)
     return [
         LocationReadCreateResponse(
             id=location.id,

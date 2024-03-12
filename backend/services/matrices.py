@@ -9,8 +9,12 @@ from models.matrix import Matrix, MatrixTypeEnum
 from schemas.matrices import MatrixCreateRequest
 
 
-async def get_matrices(session: AsyncSession) -> List[Matrix]:
-    result = await session.execute(select(Matrix).order_by(Matrix.id).limit(100))
+async def get_matrices(session: AsyncSession, start: int = None, end: int = None) -> List[Matrix]:
+    query = select(Matrix)
+    if start is not None and end is not None:
+        query = query.where(start <= Matrix.id, Matrix.id <= end)
+    result = await session.execute(query)
+
     return [Matrix(
         id=res.id,
         name=res.name,
