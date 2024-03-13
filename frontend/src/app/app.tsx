@@ -1,5 +1,5 @@
 import React from 'react';
-import { Admin, CustomRoutes, EditGuesser, Resource, ShowGuesser, localStorageStore, useStore, StoreContextProvider } from 'react-admin';
+import { Admin, CustomRoutes, Resource, ShowGuesser, localStorageStore, useStore, StoreContextProvider } from 'react-admin';
 import { Route } from 'react-router-dom';
 
 import { dataProvider } from '~/providers';
@@ -14,6 +14,7 @@ import { MatricesList, MatrixCreate } from '~/resources/matrices';
 import MatrixEdit from '~/resources/matrices/edit';
 import { themes, ThemeName } from '~/themes/themes';
 import './global.css'
+import Dashboard from '~/resources/Dashboard';
 
 const store = localStorageStore(undefined, 'avito-analytics')
 
@@ -23,12 +24,15 @@ function App() {
   const darkTheme = themes.find(theme => theme.name === themeName)?.dark;
   return (
     <Admin
+      title=""
       dataProvider={dataProvider} 
       layout={CustomLayout} 
       i18nProvider={i18nProvider} 
       darkTheme={darkTheme} 
       lightTheme={lightTheme}
       store={store}
+      dashboard={Dashboard}
+      disableTelemetry
       defaultTheme='light'>
       <Resource
         name="matrix"
