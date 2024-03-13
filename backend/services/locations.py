@@ -14,7 +14,7 @@ async def get_locations(session: AsyncSession, start: int = None, end: int = Non
     if start is not None and end is not None:
         query = query.where(start <= Location.id, Location.id <= end)
     result = await session.execute(query)
-    print(query)
+
     return [
         Location(
             id=res.id,

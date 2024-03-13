@@ -12,15 +12,11 @@ from schemas.storage import StorageConfResponse
 from services.categories import get_category
 from services.locations import get_location
 from services.segments import get_segments_by_user_id
-from storage.engine import get_storage_conf
+from storage.storage_settings import get_storage_conf
 
 
-async def get_prices(session: AsyncSession, start: int = None, end: int = None) -> List[Price]:
-    query = select(Price)
-    if start is not None and end is not None:
-        query = query.where(start <= Price.id, Price.id <= end)
-    result = await session.execute(query)
-
+async def get_prices(session: AsyncSession) -> List[Price]:
+    result = await session.execute(select(Price))
     return [
         Price(
             price=res.price,

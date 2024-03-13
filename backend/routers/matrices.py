@@ -87,7 +87,7 @@ async def create_matrix(
                 segment_id=segment_id,
             ),
         )  # add metadata
-        await add_prices(session, file, Price, matrix)  # add data
+        await add_prices(session, file, matrix)  # add data
 
     except IntegrityError as err:
         raise HTTPException(
