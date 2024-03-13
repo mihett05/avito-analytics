@@ -58,7 +58,13 @@ async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_se
 async def update_matrix_router(
     location: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)
 ):
-    await update_matrix(session, location)
+    try:
+        await update_matrix(session, location)
+    except IntegrityError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid parent id\nMore info:\n\n{err}",
+        )
     return {"status": status.HTTP_200_OK}
 
 

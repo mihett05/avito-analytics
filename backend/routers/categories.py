@@ -59,7 +59,13 @@ async def read_category(
 async def update_category_router(
     category: CategoryPutRequest, session: AsyncSession = Depends(get_sql_session)
 ):
-    await update_category(session, category)
+    try:
+        await update_category(session, category)
+    except IntegrityError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid parent id\nMore info:\n\n{err}",
+        )
     return {"status": status.HTTP_200_OK}
 
 

@@ -69,8 +69,8 @@ async def read_prices(
 
 @router.get("/price/{matrix_id}")
 async def read_prices_matrix(
-    matrix_id: int,
     total: Annotated[int, Depends(ModelTotalCount(Price))],
+    matrix_id: int,
     _start: int = 1,
     _end: int = 50,
     session: AsyncSession = Depends(get_sql_session),
@@ -90,7 +90,13 @@ async def read_prices_matrix(
 async def update_price_router(
     location: PricePutRequest, session: AsyncSession = Depends(get_sql_session)
 ):
-    await update_price(session, location)
+    try:
+        await update_price(session, location)
+    except IntegrityError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid parent id\nMore info:\n\n{err}",
+        )
     return {"status": status.HTTP_200_OK}
 
 
