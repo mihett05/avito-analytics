@@ -4,14 +4,12 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
+from sqlalchemy import update
 from models.category import Category
-from schemas.categories import CategoryCreateRequest
+from schemas.categories import CategoryCreateRequest, CategoryPutRequest
 
 
-async def get_categories(
-    session: AsyncSession, start: int = None, end: int = None
-) -> List[Category]:
+async def get_categories(session: AsyncSession, start: int = None, end: int = None) -> List[Category]:
     query = select(Category)
     if start is not None and end is not None:
         query = query.where(start <= Category.id, Category.id <= end)
@@ -28,14 +26,15 @@ async def get_categories(
     ]
 
 
+async def update_category(session: AsyncSession, category: CategoryPutRequest):
+    await session.execute(update(Category).where(Category.id == category.id).values(name=category.name))
+    await session.commit()
+
+
 async def get_category(session: AsyncSession, category_id: int) -> Category:
-    result = (
-        await session.execute(select(Category).where(Category.id == category_id))
-    ).scalar()
+    result = (await session.execute(select(Category).where(Category.id == category_id))).scalar()
     if not result:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid category id"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid category id")
 
     return Category(
         id=result.id,
@@ -45,16 +44,12 @@ async def get_category(session: AsyncSession, category_id: int) -> Category:
     )
 
 
-async def add_category(
-    session: AsyncSession, category: CategoryCreateRequest
-) -> Category:
+async def add_category(session: AsyncSession, category: CategoryCreateRequest) -> Category:
     parent = await get_category(session, category.parent_id)
     if parent is None:
         raise ValueError("Invalid parent id")
 
-    new_category = Category(
-        id=category.id, name=category.name, parent_id=category.parent_id
-    )
+    new_category = Category(id=category.id, name=category.name, parent_id=category.parent_id)
     new_category.key = f"{category.id}-{parent.key}"
 
     session.add(new_category)

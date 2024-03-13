@@ -15,7 +15,14 @@ class MatrixCreateRequest(BaseModel):
     segment_id: Optional[int]
 
 
-class MatrixReadCreateResponse(BaseModel):
+class MatrixPutRequest(BaseModel):
+    id: int
+    name: str
+    type: MatrixTypePydantic
+    segment_id: Optional[int]
+
+
+class MatrixResponse(BaseModel):
     id: int
     name: str
     type: MatrixTypePydantic

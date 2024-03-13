@@ -6,10 +6,17 @@ from pydantic import BaseModel
 class LocationCreateRequest(BaseModel):
     id: int
     name: str
-    parent_id: int
+    parent_id: Optional[int]
 
 
-class LocationReadCreateResponse(BaseModel):
+class LocationPutRequest(BaseModel):
+    id: int
+    key: str
+    name: str
+    parent_id: Optional[int]
+
+
+class LocationResponse(BaseModel):
     id: int
     key: str
     name: str

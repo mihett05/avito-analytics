@@ -7,8 +7,8 @@ from deps.pagination import ModelTotalCount
 
 from deps.sql_session import get_sql_session
 from models.location import Location
-from schemas.locations import LocationCreateRequest, LocationReadCreateResponse
-from services.locations import get_locations, get_location, add_location
+from schemas.locations import LocationCreateRequest, LocationResponse, LocationPutRequest
+from services.locations import get_locations, get_location, add_location, update_location
 from services.nodes import add_nodes_pack, delete_table, delete_instance
 
 router = APIRouter(tags=["locations"])
@@ -28,10 +28,10 @@ async def read_locations(
     _start: int = 1,
     _end: int = 50,
     session: AsyncSession = Depends(get_sql_session),
-) -> List[LocationReadCreateResponse]:
+) -> List[LocationResponse]:
     locations = await get_locations(session, start=_start, end=_end)
     return [
-        LocationReadCreateResponse(
+        LocationResponse(
             id=location.id,
             key=location.key,
             name=location.name,
@@ -44,9 +44,9 @@ async def read_locations(
 @router.get("/location/{location_id}")
 async def read_location(
     location_id: int, session: AsyncSession = Depends(get_sql_session)
-) -> LocationReadCreateResponse:
+) -> LocationResponse:
     location = await get_location(session, location_id)
-    return LocationReadCreateResponse(
+    return LocationResponse(
         id=location.id,
         key=location.key,
         name=location.name,
@@ -54,10 +54,16 @@ async def read_location(
     )
 
 
-@router.delete("/location/{location_id}")
-async def read_location(
-    location_id: int, session: AsyncSession = Depends(get_sql_session)
+@router.put("/location/{location_id}")
+async def update_location_router(
+    location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)
 ):
+    await update_location(session, location)
+    return {"status": status.HTTP_200_OK}
+
+
+@router.delete("/location/{location_id}")
+async def delete_location(location_id: int, session: AsyncSession = Depends(get_sql_session)):
     await delete_instance(session, location_id, Location)
     return {"status": status.HTTP_200_OK}
 
@@ -65,7 +71,7 @@ async def read_location(
 @router.post("/location")
 async def create_location(
     request: LocationCreateRequest, session: AsyncSession = Depends(get_sql_session)
-) -> LocationReadCreateResponse:
+) -> LocationResponse:
     try:
         location = await add_location(session, request)
     except (IntegrityError, ValueError) as err:
@@ -74,7 +80,7 @@ async def create_location(
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
 
-    return LocationReadCreateResponse(
+    return LocationResponse(
         id=location.id,
         key=location.key,
         name=location.name,
@@ -83,9 +89,7 @@ async def create_location(
 
 
 @router.post("/location/csv")
-async def upload_csv(
-    file: UploadFile, session: AsyncSession = Depends(get_sql_session)
-):
+async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sql_session)):
     try:
         await add_nodes_pack(session, file, Location)
     except IntegrityError as err:

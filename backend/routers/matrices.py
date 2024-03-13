@@ -11,11 +11,12 @@ from deps.redis_session import get_redis_session
 from deps.sql_session import get_sql_session
 from models import Matrix
 from schemas.matrices import (
-    MatrixReadCreateResponse,
+    MatrixResponse,
     MatrixCreateRequest,
     MatrixTypePydantic,
+    MatrixPutRequest,
 )
-from services.matrices import get_matrices, get_matrix, add_matrix, delete_matrix_by_id
+from services.matrices import get_matrices, get_matrix, add_matrix, delete_matrix_by_id, update_matrix
 from services.nodes import add_prices, delete_table
 from storage.storage_settings import get_storage_conf
 
@@ -34,10 +35,10 @@ async def read_matrices(
     _start: int = 1,
     _end: int = 50,
     session: AsyncSession = Depends(get_sql_session),
-) -> List[MatrixReadCreateResponse]:
+) -> List[MatrixResponse]:
     matrices = await get_matrices(session, start=_start, end=_end)
     return [
-        MatrixReadCreateResponse(
+        MatrixResponse(
             id=matrix.id,
             name=matrix.name,
             type=matrix.type,
@@ -48,13 +49,17 @@ async def read_matrices(
 
 
 @router.get("/matrix/{matrix_id}")
-async def read_matrix(
-    matrix_id: int, session: AsyncSession = Depends(get_sql_session)
-) -> MatrixReadCreateResponse:
+async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_session)) -> MatrixResponse:
     matrix = await get_matrix(session, matrix_id)
-    return MatrixReadCreateResponse(
-        id=matrix.id, name=matrix.name, type=matrix.type, segment_id=matrix.segment_id
-    )
+    return MatrixResponse(id=matrix.id, name=matrix.name, type=matrix.type, segment_id=matrix.segment_id)
+
+
+@router.put("/matrix/{matrix_id}")
+async def update_matrix_router(
+    location: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)
+):
+    await update_matrix(session, location)
+    return {"status": status.HTTP_200_OK}
 
 
 @router.delete("/matrix/{matrix_id}")
@@ -86,17 +91,13 @@ async def create_matrix(
     file: UploadFile,
     segment_id: Optional[int] = None,
     session: AsyncSession = Depends(get_sql_session),
-) -> MatrixReadCreateResponse:
+) -> MatrixResponse:
     try:
         # cat loc price
         matrix = await add_matrix(
             session,
             MatrixCreateRequest(
-                type=(
-                    MatrixTypePydantic.DISCOUNT
-                    if segment_id is not None
-                    else MatrixTypePydantic.BASE
-                ),
+                type=(MatrixTypePydantic.DISCOUNT if segment_id is not None else MatrixTypePydantic.BASE),
                 name=name,
                 segment_id=segment_id,
             ),
@@ -109,6 +110,4 @@ async def create_matrix(
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
 
-    return MatrixReadCreateResponse(
-        id=matrix.id, name=matrix.name, type=matrix.type, segment_id=matrix.segment_id
-    )
+    return MatrixResponse(id=matrix.id, name=matrix.name, type=matrix.type, segment_id=matrix.segment_id)

@@ -2,12 +2,12 @@ from typing import List
 
 from fastapi import HTTPException
 from redis.asyncio import Redis
-from sqlalchemy import select, text, bindparam, delete
+from sqlalchemy import select, text, bindparam, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from models.price import Price
-from schemas.prices import PriceCreateRequest, PriceGetResponse, PriceReadRequest
+from schemas.prices import PriceCreateRequest, PriceGetResponse, PriceReadRequest, PricePutRequest
 from schemas.storage import StorageConfResponse
 from services.categories import get_category
 from services.locations import get_location
@@ -60,9 +60,7 @@ async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
         )
     ).scalar()
     if not result:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid price key"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid price key")
 
     return Price(
         price=result.price,
@@ -70,6 +68,19 @@ async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
         location_id=result.location_id,
         category_id=result.category_id,
     )
+
+
+async def update_price(session: AsyncSession, price: PricePutRequest):
+    await session.execute(
+        update(Price)
+        .where(
+            Price.matrix_id == price.matrix_id,
+            Price.location_id == price.location_id,
+            Price.category_id == price.category_id,
+        )
+        .values(price=price.price)
+    )
+    await session.commit()
 
 
 async def add_price(session: AsyncSession, price: PriceCreateRequest) -> Price:
@@ -93,12 +104,8 @@ async def get_target_price(
     location_id: int,
     redis_session: Redis,
 ) -> PriceGetResponse:
-    locations = list(
-        map(int, (await get_location(session, location_id)).key.split("-"))
-    )
-    categories = list(
-        map(int, (await get_category(session, category_id)).key.split("-"))
-    )
+    locations = list(map(int, (await get_location(session, location_id)).key.split("-")))
+    categories = list(map(int, (await get_category(session, category_id)).key.split("-")))
 
     segments = await get_segments_by_user_id(user_id)
     storage: StorageConfResponse = await get_storage_conf(redis_session)
@@ -138,9 +145,7 @@ async def get_target_price(
         )
     ).first()  # .all()
     if not result:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data was passed"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data was passed")
 
     return PriceGetResponse(
         location_id=result[0],

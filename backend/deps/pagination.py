@@ -16,8 +16,6 @@ class ModelTotalCount:
         response: Response,
     ) -> Any:
         response.headers.append("Access-Control-Expose-Headers", "X-Total-Count")
-        total_count = (
-            await session.execute(select(func.count("*")).select_from(self.model))
-        ).scalar()
+        total_count = (await session.execute(select(func.count("*")).select_from(self.model))).scalar()
         response.headers.append("X-Total-Count", str(total_count))
         return total_count

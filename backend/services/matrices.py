@@ -1,17 +1,15 @@
 from typing import List
 
 from fastapi import HTTPException
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from models.matrix import Matrix, MatrixTypeEnum
-from schemas.matrices import MatrixCreateRequest
+from schemas.matrices import MatrixCreateRequest, MatrixPutRequest
 
 
-async def get_matrices(
-    session: AsyncSession, start: int = None, end: int = None
-) -> List[Matrix]:
+async def get_matrices(session: AsyncSession, start: int = None, end: int = None) -> List[Matrix]:
     query = select(Matrix)
     if start is not None and end is not None:
         query = query.where(start <= Matrix.id, Matrix.id <= end)
@@ -31,19 +29,28 @@ async def get_matrices(
 async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
     res = (await session.execute(select(Matrix).where(Matrix.id == matrix_id))).scalar()
     if not res:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="matrix wasn't found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="matrix wasn't found")
 
     return Matrix(id=res.id, name=res.name, type=res.type, segment_id=res.segment_id)
+
+
+async def update_matrix(session: AsyncSession, matrix: MatrixPutRequest):
+    await session.execute(
+        update(Matrix)
+        .where(Matrix.id == matrix.id)
+        .values(
+            name=matrix.name,
+            segment_id=matrix.segment_id,
+            type=MatrixTypeEnum.DISCOUNT if matrix.segment_id else MatrixTypeEnum.BASE,
+        )
+    )
+    await session.commit()
 
 
 async def get_matrix__id_in(
     session: AsyncSession, ides: List[int], matrix_type: str = MatrixTypeEnum.DISCOUNT
 ) -> List[Matrix]:
-    result = await session.execute(
-        select(Matrix).where(Matrix.id.in_(ides), Matrix.type == matrix_type)
-    )
+    result = await session.execute(select(Matrix).where(Matrix.id.in_(ides), Matrix.type == matrix_type))
     return [
         Matrix(
             id=res.id,

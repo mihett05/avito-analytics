@@ -12,14 +12,14 @@ from deps.redis_session import get_redis_session
 from deps.sql_session import get_sql_session
 from models import Price
 from schemas.prices import (
-    PriceReadCreateResponse,
+    PriceResponse,
     PriceReadRequest,
     PriceCreateRequest,
     PriceGetRequest,
-    PriceGetResponse,
+    PriceGetResponse, PricePutRequest,
 )
 from services.nodes import delete_table
-from services.prices import get_prices, get_price, add_price, get_target_price
+from services.prices import get_prices, get_price, add_price, get_target_price, update_price
 from storage.analytics import add_updates
 
 router = APIRouter(tags=["prices"])
@@ -31,9 +31,7 @@ async def calculate_target_price(
     session: AsyncSession = Depends(get_sql_session),
     redis_session: Redis = Depends(get_redis_session),
 ) -> PriceGetResponse:
-    asyncio.create_task(
-        add_updates(redis_session, request.location_id, request.category_id)
-    )
+    asyncio.create_task(add_updates(redis_session, request.location_id, request.category_id))
 
     return await get_target_price(
         session=session,
@@ -56,10 +54,10 @@ async def read_prices(
     _start: int = 1,
     _end: int = 50,
     session: AsyncSession = Depends(get_sql_session),
-) -> List[PriceReadCreateResponse]:
+) -> List[PriceResponse]:
     prices = await get_prices(session, start=_start, end=_end)
     return [
-        PriceReadCreateResponse(
+        PriceResponse(
             price=price.price,
             matrix_id=price.matrix_id,
             location_id=price.location_id,
@@ -76,18 +74,24 @@ async def read_prices_matrix(
     _start: int = 1,
     _end: int = 50,
     session: AsyncSession = Depends(get_sql_session),
-) -> List[PriceReadCreateResponse]:
+) -> List[PriceResponse]:
     return [
-        PriceReadCreateResponse(
+        PriceResponse(
             price=price.price,
             matrix_id=price.matrix_id,
             location_id=price.location_id,
             category_id=price.category_id,
         )
-        for price in await get_prices(
-            session, matrix_id=matrix_id, start=_start, end=_end
-        )
+        for price in await get_prices(session, matrix_id=matrix_id, start=_start, end=_end)
     ]
+
+
+@router.put("/price")
+async def update_price_router(
+    location: PricePutRequest, session: AsyncSession = Depends(get_sql_session)
+):
+    await update_price(session, location)
+    return {"status": status.HTTP_200_OK}
 
 
 @router.get("/price/{category_id}/{location_id}/{matrix_id}")
@@ -96,15 +100,13 @@ async def read_price(
     location_id: int,
     matrix_id: int,
     session: AsyncSession = Depends(get_sql_session),
-) -> PriceReadCreateResponse:
+) -> PriceResponse:
     price = await get_price(
         session,
-        PriceReadRequest(
-            category_id=category_id, location_id=location_id, matrix_id=matrix_id
-        ),
+        PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id),
     )
 
-    return PriceReadCreateResponse(
+    return PriceResponse(
         price=price.price,
         matrix_id=price.matrix_id,
         location_id=price.location_id,
@@ -122,9 +124,7 @@ async def delete_price(
     try:
         await delete_price(
             session,
-            PriceReadRequest(
-                category_id=category_id, location_id=location_id, matrix_id=matrix_id
-            ),
+            PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id),
         )
     except IntegrityError:
         raise HTTPException(
@@ -138,7 +138,7 @@ async def delete_price(
 @router.post("/price")
 async def create_price(
     request: PriceCreateRequest, session: AsyncSession = Depends(get_sql_session)
-) -> PriceReadCreateResponse:
+) -> PriceResponse:
     try:
         price = await add_price(session, request)
     except IntegrityError as err:
@@ -147,7 +147,7 @@ async def create_price(
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
 
-    return PriceReadCreateResponse(
+    return PriceResponse(
         price=price.price,
         matrix_id=price.matrix_id,
         location_id=price.location_id,
