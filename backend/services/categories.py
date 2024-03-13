@@ -9,11 +9,9 @@ from models.category import Category
 from schemas.categories import CategoryCreateRequest, CategoryPutRequest
 
 
-async def get_categories(session: AsyncSession, start: int = None, end: int = None) -> List[Category]:
-    query = select(Category)
-    if start is not None and end is not None:
-        query = query.where(start <= Category.id, Category.id <= end)
-    result = await session.execute(query)
+async def get_categories(session: AsyncSession, start: int = 1, end: int = 50) -> List[Category]:
+    page = end - start
+    result = await session.execute(select(Category).offset(page * (start // page)).limit(page))
 
     return [
         Category(id=res.id, key=res.key, name=res.name, parent_id=res.parent_id)
