@@ -1,13 +1,15 @@
 from typing import Annotated, List, Optional, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from redis.asyncio import Redis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-from deps.pagination import ModelTotalCount
 
+from deps.pagination import ModelTotalCount
+from deps.redis_session import get_redis_session
 from deps.sql_session import get_sql_session
-from models import Price, Matrix
+from models import Matrix
 from schemas.matrices import (
     MatrixReadCreateResponse,
     MatrixCreateRequest,
@@ -15,6 +17,7 @@ from schemas.matrices import (
 )
 from services.matrices import get_matrices, get_matrix, add_matrix, delete_matrix_by_id
 from services.nodes import add_prices, delete_table
+from storage.storage_settings import get_storage_conf
 
 router = APIRouter(tags=["matrices"])
 
@@ -27,9 +30,10 @@ async def delete_all_matrices(session: AsyncSession = Depends(get_sql_session)) 
 
 @router.get("/matrix")
 async def read_matrices(
-        total: Annotated[int, Depends(ModelTotalCount(Matrix))],
-        _start: int = 1, _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    total: Annotated[int, Depends(ModelTotalCount(Matrix))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> List[MatrixReadCreateResponse]:
     matrices = await get_matrices(session, start=_start, end=_end)
     return [
@@ -45,7 +49,7 @@ async def read_matrices(
 
 @router.get("/matrix/{matrix_id}")
 async def read_matrix(
-        matrix_id: int, session: AsyncSession = Depends(get_sql_session)
+    matrix_id: int, session: AsyncSession = Depends(get_sql_session)
 ) -> MatrixReadCreateResponse:
     matrix = await get_matrix(session, matrix_id)
     return MatrixReadCreateResponse(
@@ -54,8 +58,18 @@ async def read_matrix(
 
 
 @router.delete("/matrix/{matrix_id}")
-async def delete_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_session)):
+async def delete_matrix(
+    matrix_id: int,
+    session: AsyncSession = Depends(get_sql_session),
+    redis_session: Redis = Depends(get_redis_session),
+):
     try:
+        storage = await get_storage_conf(redis_session)
+        if matrix_id == storage.baseline or matrix_id in storage.discounts:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"You are trying to delete matrix from storage, please set it before deletion",
+            )
         await delete_matrix_by_id(session, matrix_id)
     except IntegrityError:
         raise HTTPException(
@@ -68,10 +82,10 @@ async def delete_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_
 
 @router.post("/matrix")
 async def create_matrix(
-        name: str,
-        file: UploadFile,
-        segment_id: Optional[int] = None,
-        session: AsyncSession = Depends(get_sql_session)
+    name: str,
+    file: UploadFile,
+    segment_id: Optional[int] = None,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> MatrixReadCreateResponse:
     try:
         # cat loc price

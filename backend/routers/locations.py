@@ -15,16 +15,19 @@ router = APIRouter(tags=["locations"])
 
 
 @router.delete("/location")
-async def delete_all_locations(session: AsyncSession = Depends(get_sql_session)) -> Dict:
+async def delete_all_locations(
+    session: AsyncSession = Depends(get_sql_session),
+) -> Dict:
     await delete_table(session, Location)
     return {"status": status.HTTP_200_OK}
 
 
 @router.get("/location")
 async def read_locations(
-        total: Annotated[int, Depends(ModelTotalCount(Location))],
-        _start: int = 1, _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    total: Annotated[int, Depends(ModelTotalCount(Location))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> List[LocationReadCreateResponse]:
     locations = await get_locations(session, start=_start, end=_end)
     return [
@@ -40,7 +43,7 @@ async def read_locations(
 
 @router.get("/location/{location_id}")
 async def read_location(
-        location_id: int, session: AsyncSession = Depends(get_sql_session)
+    location_id: int, session: AsyncSession = Depends(get_sql_session)
 ) -> LocationReadCreateResponse:
     location = await get_location(session, location_id)
     return LocationReadCreateResponse(
@@ -52,14 +55,16 @@ async def read_location(
 
 
 @router.delete("/location/{location_id}")
-async def read_location(location_id: int, session: AsyncSession = Depends(get_sql_session)):
+async def read_location(
+    location_id: int, session: AsyncSession = Depends(get_sql_session)
+):
     await delete_instance(session, location_id, Location)
     return {"status": status.HTTP_200_OK}
 
 
 @router.post("/location")
 async def create_location(
-        request: LocationCreateRequest, session: AsyncSession = Depends(get_sql_session)
+    request: LocationCreateRequest, session: AsyncSession = Depends(get_sql_session)
 ) -> LocationReadCreateResponse:
     try:
         location = await add_location(session, request)
@@ -78,7 +83,9 @@ async def create_location(
 
 
 @router.post("/location/csv")
-async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sql_session)):
+async def upload_csv(
+    file: UploadFile, session: AsyncSession = Depends(get_sql_session)
+):
     try:
         await add_nodes_pack(session, file, Location)
     except IntegrityError as err:
@@ -87,4 +94,4 @@ async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sql_s
             detail=f"Invalid parent id\nMore info:\n\n{err}",
         )
 
-    return {'status': status.HTTP_200_OK}
+    return {"status": status.HTTP_200_OK}

@@ -9,41 +9,50 @@ from models.matrix import Matrix, MatrixTypeEnum
 from schemas.matrices import MatrixCreateRequest
 
 
-async def get_matrices(session: AsyncSession, start: int = None, end: int = None) -> List[Matrix]:
+async def get_matrices(
+    session: AsyncSession, start: int = None, end: int = None
+) -> List[Matrix]:
     query = select(Matrix)
     if start is not None and end is not None:
         query = query.where(start <= Matrix.id, Matrix.id <= end)
     result = await session.execute(query)
 
-    return [Matrix(
-        id=res.id,
-        name=res.name,
-        type=res.type,
-        segment_id=res.segment_id,
-    ) for res in result.scalars().all()]
+    return [
+        Matrix(
+            id=res.id,
+            name=res.name,
+            type=res.type,
+            segment_id=res.segment_id,
+        )
+        for res in result.scalars().all()
+    ]
 
 
 async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
     res = (await session.execute(select(Matrix).where(Matrix.id == matrix_id))).scalar()
     if not res:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="matrix wasn't found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="matrix wasn't found"
+        )
 
-    return Matrix(
-        id=res.id,
-        name=res.name,
-        type=res.type,
-        segment_id=res.segment_id
+    return Matrix(id=res.id, name=res.name, type=res.type, segment_id=res.segment_id)
+
+
+async def get_matrix__id_in(
+    session: AsyncSession, ides: List[int], matrix_type: str = MatrixTypeEnum.DISCOUNT
+) -> List[Matrix]:
+    result = await session.execute(
+        select(Matrix).where(Matrix.id.in_(ides), Matrix.type == matrix_type)
     )
-
-
-async def get_matrix__id_in(session: AsyncSession, ides: List[int], matrix_type: str = MatrixTypeEnum.DISCOUNT) -> List[Matrix]:
-    result = await session.execute(select(Matrix).where(Matrix.id.in_(ides), Matrix.type == matrix_type))
-    return [Matrix(
-        id=res.id,
-        name=res.name,
-        type=res.type,
-        segment_id=res.segment_id,
-    ) for res in result.scalars().all()]
+    return [
+        Matrix(
+            id=res.id,
+            name=res.name,
+            type=res.type,
+            segment_id=res.segment_id,
+        )
+        for res in result.scalars().all()
+    ]
 
 
 async def add_matrix(session: AsyncSession, matrix: MatrixCreateRequest) -> Matrix:

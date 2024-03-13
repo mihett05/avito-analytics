@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 
 class MatrixTypePydantic(str, Enum):
-    BASE = 'BASE'
-    DISCOUNT = 'DISCOUNT'
+    BASE = "BASE"
+    DISCOUNT = "DISCOUNT"
 
 
 class MatrixCreateRequest(BaseModel):
