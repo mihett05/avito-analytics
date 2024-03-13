@@ -26,6 +26,11 @@ async def delete_table(session: AsyncSession, model: Type[Union[Category, Matrix
     await session.commit()
 
 
+async def delete_instance(session: AsyncSession, model_id: int, model: Type[Union[Category, Matrix, Location]]):
+    await session.execute(delete(model).where(model.id == model_id))
+    await session.commit()
+
+
 async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Union[Location, Category]]):
     if model is not Category and model is not Location:
         raise ValueError("Invalid 'model' passed")

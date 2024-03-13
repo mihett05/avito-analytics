@@ -10,7 +10,7 @@ from deps.sql_session import get_sql_session
 from models.category import Category
 from schemas.categories import CategoryCreateRequest, CategoryReadCreateResponse
 from services.categories import get_categories, get_category, add_category
-from services.nodes import add_nodes_pack, delete_table
+from services.nodes import add_nodes_pack, delete_table, delete_instance
 
 router = APIRouter(tags=["categories"])
 
@@ -50,6 +50,12 @@ async def read_category(
         name=category.name,
         parent_id=category.parent_id,
     )
+
+
+@router.delete("/category/{category_id}")
+async def read_location(category_id: int, session: AsyncSession = Depends(get_sql_session)):
+    await delete_instance(session, category_id, Category)
+    return {"status": status.HTTP_200_OK}
 
 
 @router.post("/category")

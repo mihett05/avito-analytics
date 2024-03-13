@@ -13,10 +13,15 @@ from services.categories import get_category
 from services.locations import get_location
 from services.segments import get_segments_by_user_id
 from storage.storage_settings import get_storage_conf
+from typing import Optional
 
 
-async def get_prices(session: AsyncSession) -> List[Price]:
-    result = await session.execute(select(Price))
+async def get_prices(session: AsyncSession, matrix_id: Optional[int] = None) -> List[Price]:
+    query = select(Price)
+    if matrix_id:
+        query = query.where(Price.matrix_id == matrix_id)
+
+    result = await session.execute(query)
     return [
         Price(
             price=res.price,

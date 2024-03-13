@@ -60,6 +60,23 @@ async def read_prices(
     ]
 
 
+@router.get("/price/{matrix_id}")
+async def read_prices_matrix(
+        matrix_id: int,
+        total: Annotated[int, Depends(ModelTotalCount(Price))],
+        session: AsyncSession = Depends(get_sql_session),
+) -> List[PriceReadCreateResponse]:
+    return [
+        PriceReadCreateResponse(
+            price=price.price,
+            matrix_id=price.matrix_id,
+            location_id=price.location_id,
+            category_id=price.category_id,
+        )
+        for price in await get_prices(session, matrix_id=matrix_id)
+    ]
+
+
 @router.get("/price/{category_id}/{location_id}/{matrix_id}")
 async def read_price(
         category_id: int,

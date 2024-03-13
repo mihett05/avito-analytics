@@ -9,7 +9,7 @@ from deps.sql_session import get_sql_session
 from models.location import Location
 from schemas.locations import LocationCreateRequest, LocationReadCreateResponse
 from services.locations import get_locations, get_location, add_location
-from services.nodes import add_nodes_pack, delete_table
+from services.nodes import add_nodes_pack, delete_table, delete_instance
 
 router = APIRouter(tags=["locations"])
 
@@ -26,7 +26,6 @@ async def read_locations(
         _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[LocationReadCreateResponse]:
-
     locations = await get_locations(session, start=_start, end=_end)
     return [
         LocationReadCreateResponse(
@@ -50,6 +49,12 @@ async def read_location(
         name=location.name,
         parent_id=location.parent_id,
     )
+
+
+@router.delete("/location/{location_id}")
+async def read_location(location_id: int, session: AsyncSession = Depends(get_sql_session)):
+    await delete_instance(session, location_id, Location)
+    return {"status": status.HTTP_200_OK}
 
 
 @router.post("/location")
