@@ -10,7 +10,6 @@ from models.category import Category
 class Price(Base):
     __tablename__ = "prices"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     price: Mapped[int] = mapped_column()
 
     matrix_id: Mapped[int] = mapped_column(ForeignKey("matrices.id", ondelete="cascade"), primary_key=True)

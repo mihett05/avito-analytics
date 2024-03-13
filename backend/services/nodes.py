@@ -14,7 +14,7 @@ from services.categories import get_categories
 from services.locations import get_locations
 
 
-def convector(data: bytes, separator=';'):
+def convertor(data: bytes, separator=';'):
     return [
         [int(col) if col.isdigit() else col for col in row.replace('"', '').split(separator)]
         for row in data.decode().strip().split('\n')
@@ -39,7 +39,7 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
 
     new_data = [
         [col if col else None for col in row]
-        for row in convector(await file.read())
+        for row in convertor(await file.read())
     ]
 
     keys = ('id', 'name', 'parent_id')
@@ -60,10 +60,7 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
     await session.commit()
 
 
-async def add_prices(session: AsyncSession, file: UploadFile, model: type, matrix: Matrix):
-    if model is not Price:
-        raise ValueError("Invalid 'model' passed")
-
+async def add_prices(session: AsyncSession, file: UploadFile, matrix: Matrix):
     data = [
         {
             'price': int(row[2]),
@@ -71,10 +68,10 @@ async def add_prices(session: AsyncSession, file: UploadFile, model: type, matri
             'location_id': int(row[1]),
             'category_id': int(row[0])
         }
-        for row in convector(await file.read())
+        for row in convertor(await file.read())
     ]
 
     for chunk in make_chunks(data):
-        await session.execute(insert(model).values(chunk).on_conflict_do_nothing())
+        await session.execute(insert(Price).values(chunk).on_conflict_do_nothing())
 
     await session.commit()
