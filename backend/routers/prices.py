@@ -50,9 +50,10 @@ async def delete_all_prices(session: AsyncSession = Depends(get_sql_session)) ->
 @router.get("/price")
 async def read_prices(
         total: Annotated[int, Depends(ModelTotalCount(Price))],
+        _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[PriceReadCreateResponse]:
-    prices = await get_prices(session)
+    prices = await get_prices(session, start=1, end=50, )
     return [
         PriceReadCreateResponse(
             price=price.price,
