@@ -54,19 +54,17 @@ async def update_total_requests(client: Redis, retry=0):
 
     if not await client.get('total_requests'):
         await client.set('total_requests', 0)
-
     await client.incrby(name="total_requests", amount=1)
 
 
 @retries
 async def update_date_request(client: Redis, retry=0):
+    key = datetime.date.today().strftime("%d.%m.%Y")
     if retry > MAX_RETRY_COUNT:
         return
 
-    key = datetime.date.today().strftime("%m.%d.%Y")
     if not await client.hget('dates', '-1'):
         await client.hset('dates', mapping={'-1': -1})
-
     if not await client.hget('dates', key):
         await client.hset('dates', key=key, value=0)
     await client.hincrby(name='dates', key=key, amount=1)
@@ -79,7 +77,6 @@ async def update_locations_requests(client: Redis, location_id: int, retry=0):
 
     if not await client.hget('locations', '-1'):
         await client.hset('locations', mapping={'-1': -1})
-
     if not await client.hget('locations', str(location_id)):
         await client.hset('locations', key=str(location_id), value=0)
     await client.hincrby(name="locations", key=str(location_id), amount=1)
@@ -92,7 +89,6 @@ async def update_categories_requests(client: Redis, category_id: int, retry=0):
 
     if not await client.hget('categories', '-1'):
         await client.hset('categories', mapping={'-1': -1})
-
     if not await client.hget('categories', str(category_id)):
         await client.hset('categories', key=str(category_id), value=0)
     await client.hincrby(name="categories", key=str(category_id), amount=1)
