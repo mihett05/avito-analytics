@@ -39,17 +39,13 @@ async def get_category(session: AsyncSession, category_id: int) -> Category:
     )
 
 
-async def add_category(
-        session: AsyncSession, category: CategoryCreateRequest
-) -> Category:
+async def add_category(session: AsyncSession, category: CategoryCreateRequest) -> Category:
     parent = await get_category(session, category.parent_id)
     if parent is None:
         raise ValueError('Invalid parent id')
 
-    new_category = Category(
-        id=category.id, name=category.name, parent_id=category.parent_id
-    )
-    new_category.key = f"{parent.key}-{category.id}"
+    new_category = Category(id=category.id, name=category.name, parent_id=category.parent_id)
+    new_category.key = f"{category.id}-{parent.key}"
 
     session.add(new_category)
     await session.commit()

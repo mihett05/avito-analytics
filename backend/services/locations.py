@@ -46,10 +46,8 @@ async def add_location(
     if parent is None:
         raise ValueError("Invalid parent id")
 
-    new_location = Location(
-        id=location.id, name=location.name, parent_id=location.parent_id
-    )
-    new_location.key = f"{parent.key}-{location.id}"
+    new_location = Location(id=location.id, name=location.name, parent_id=location.parent_id)
+    new_location.key = f"{location.id}-{parent.key}"
 
     session.add(new_location)
     await session.commit()
