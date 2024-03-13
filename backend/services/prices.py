@@ -2,12 +2,12 @@ from typing import List
 
 from fastapi import HTTPException
 from redis.asyncio import Redis
-from sqlalchemy import select, text, bindparam, delete
+from sqlalchemy import select, text, bindparam, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from models.price import Price
-from schemas.prices import PriceCreateRequest, PriceGetResponse, PriceReadRequest
+from schemas.prices import PriceCreateRequest, PriceGetResponse, PriceReadRequest, PricePutRequest
 from schemas.storage import StorageConfResponse
 from services.categories import get_category
 from services.locations import get_location
@@ -17,10 +17,10 @@ from typing import Optional
 
 
 async def get_prices(
-        session: AsyncSession,
-        matrix_id: Optional[int] = None,
-        start: int = 1,
-        end: int = 50
+    session: AsyncSession,
+    matrix_id: Optional[int] = None,
+    start: int = 1,
+    end: int = 50,
 ) -> List[Price]:
     page = end - start
     query = select(Price).offset(page * (start // page)).limit(page)
@@ -30,10 +30,7 @@ async def get_prices(
     result = await session.execute(query)
     return [
         Price(
-            price=res.price,
-            matrix_id=res.matrix_id,
-            location_id=res.location_id,
-            category_id=res.category_id,
+            price=res.price, matrix_id=res.matrix_id, location_id=res.location_id, category_id=res.category_id
         )
         for res in result.scalars().all()
     ]
@@ -47,16 +44,19 @@ async def delete_price(session: AsyncSession, req: PriceReadRequest):
             Price.category_id == req.category_id,
         )
     )
+    await session.commit()
 
 
 async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
-    result = (await session.execute(
-        select(Price).where(
-            Price.matrix_id == req.matrix_id,
-            Price.location_id == req.location_id,
-            Price.category_id == req.category_id,
+    result = (
+        await session.execute(
+            select(Price).where(
+                Price.matrix_id == req.matrix_id,
+                Price.location_id == req.location_id,
+                Price.category_id == req.category_id,
+            )
         )
-    )).scalar()
+    ).scalar()
     if not result:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid price key")
 
@@ -66,6 +66,19 @@ async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
         location_id=result.location_id,
         category_id=result.category_id,
     )
+
+
+async def set_price(session: AsyncSession, price: PricePutRequest):
+    await session.execute(
+        update(Price)
+        .where(
+            Price.matrix_id == price.matrix_id,
+            Price.location_id == price.location_id,
+            Price.category_id == price.category_id,
+        )
+        .values(price=price.price)
+    )
+    await session.commit()
 
 
 async def add_price(session: AsyncSession, price: PriceCreateRequest) -> Price:
@@ -83,11 +96,7 @@ async def add_price(session: AsyncSession, price: PriceCreateRequest) -> Price:
 
 
 async def get_target_price(
-        session: AsyncSession,
-        user_id: int,
-        category_id: int,
-        location_id: int,
-        redis_session: Redis
+    session: AsyncSession, user_id: int, category_id: int, location_id: int, redis_session: Redis
 ) -> PriceGetResponse:
     locations = list(map(int, (await get_location(session, location_id)).key.split("-")))
     categories = list(map(int, (await get_category(session, category_id)).key.split("-")))
@@ -130,7 +139,7 @@ async def get_target_price(
         )
     ).first()  # .all()
     if not result:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid data was passed')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data was passed")
 
     return PriceGetResponse(
         location_id=result[0],

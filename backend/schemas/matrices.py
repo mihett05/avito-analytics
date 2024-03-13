@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 
 class MatrixTypePydantic(str, Enum):
-    BASE = 'BASE'
-    DISCOUNT = 'DISCOUNT'
+    BASE = "BASE"
+    DISCOUNT = "DISCOUNT"
 
 
 class MatrixCreateRequest(BaseModel):
@@ -15,7 +15,14 @@ class MatrixCreateRequest(BaseModel):
     segment_id: Optional[int]
 
 
-class MatrixReadCreateResponse(BaseModel):
+class MatrixPutRequest(BaseModel):
+    id: int
+    name: str
+    type: MatrixTypePydantic
+    segment_id: Optional[int]
+
+
+class MatrixResponse(BaseModel):
     id: int
     name: str
     type: MatrixTypePydantic

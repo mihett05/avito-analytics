@@ -16,17 +16,24 @@ class PriceCreateRequest(BaseModel):
     category_id: int
 
 
-class PriceReadCreateResponse(BaseModel):
+class PriceGetRequest(BaseModel):
+    location_id: int
+    category_id: int
+    user_id: int
+
+
+class PricePutRequest(BaseModel):
     price: int
     matrix_id: int
     location_id: int
     category_id: int
 
 
-class PriceGetRequest(BaseModel):
+class PriceResponse(BaseModel):
+    price: int
+    matrix_id: int
     location_id: int
     category_id: int
-    user_id: int
 
 
 class PriceGetResponse(BaseModel):

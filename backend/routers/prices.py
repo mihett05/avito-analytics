@@ -12,13 +12,15 @@ from deps.redis_session import get_redis_session
 from deps.sql_session import get_sql_session
 from models import Price
 from schemas.prices import (
-    PriceReadCreateResponse,
+    PriceResponse,
     PriceReadRequest,
     PriceCreateRequest,
-    PriceGetRequest, PriceGetResponse,
+    PriceGetRequest,
+    PriceGetResponse,
+    PricePutRequest,
 )
 from services.nodes import delete_table
-from services.prices import get_prices, get_price, add_price, get_target_price
+from services.prices import get_prices, get_price, add_price, get_target_price, set_price
 from storage.analytics import add_updates
 
 router = APIRouter(tags=["prices"])
@@ -26,9 +28,9 @@ router = APIRouter(tags=["prices"])
 
 @router.post("/price/target")
 async def calculate_target_price(
-        request: PriceGetRequest,
-        session: AsyncSession = Depends(get_sql_session),
-        redis_session: Redis = Depends(get_redis_session)
+    request: PriceGetRequest,
+    session: AsyncSession = Depends(get_sql_session),
+    redis_session: Redis = Depends(get_redis_session),
 ) -> PriceGetResponse:
     asyncio.create_task(add_updates(redis_session, request.location_id, request.category_id))
 
@@ -37,7 +39,7 @@ async def calculate_target_price(
         user_id=request.user_id,
         category_id=request.category_id,
         location_id=request.location_id,
-        redis_session=redis_session
+        redis_session=redis_session,
     )
 
 
@@ -49,13 +51,14 @@ async def delete_all_prices(session: AsyncSession = Depends(get_sql_session)) ->
 
 @router.get("/price")
 async def read_prices(
-        total: Annotated[int, Depends(ModelTotalCount(Price))],
-        _start: int = 1, _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
-) -> List[PriceReadCreateResponse]:
+    total: Annotated[int, Depends(ModelTotalCount(Price))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
+) -> List[PriceResponse]:
     prices = await get_prices(session, start=_start, end=_end)
     return [
-        PriceReadCreateResponse(
+        PriceResponse(
             price=price.price,
             matrix_id=price.matrix_id,
             location_id=price.location_id,
@@ -67,13 +70,14 @@ async def read_prices(
 
 @router.get("/price/{matrix_id}")
 async def read_prices_matrix(
-        matrix_id: int,
-        total: Annotated[int, Depends(ModelTotalCount(Price))],
-        _start: int = 1, _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
-) -> List[PriceReadCreateResponse]:
+    total: Annotated[int, Depends(ModelTotalCount(Price))],
+    matrix_id: int,
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
+) -> List[PriceResponse]:
     return [
-        PriceReadCreateResponse(
+        PriceResponse(
             price=price.price,
             matrix_id=price.matrix_id,
             location_id=price.location_id,
@@ -83,21 +87,28 @@ async def read_prices_matrix(
     ]
 
 
+@router.put("/price")
+async def update_price_router(location: PricePutRequest, session: AsyncSession = Depends(get_sql_session)):
+    try:
+        await set_price(session, location)
+    except IntegrityError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
+        )
+    return {"status": status.HTTP_200_OK}
+
+
 @router.get("/price/{category_id}/{location_id}/{matrix_id}")
 async def read_price(
-        category_id: int,
-        location_id: int,
-        matrix_id: int,
-        session: AsyncSession = Depends(get_sql_session),
-) -> PriceReadCreateResponse:
+    category_id: int,
+    location_id: int,
+    matrix_id: int,
+    session: AsyncSession = Depends(get_sql_session),
+) -> PriceResponse:
     price = await get_price(
-        session,
-        PriceReadRequest(
-            category_id=category_id, location_id=location_id, matrix_id=matrix_id
-        ),
+        session, PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id)
     )
-
-    return PriceReadCreateResponse(
+    return PriceResponse(
         price=price.price,
         matrix_id=price.matrix_id,
         location_id=price.location_id,
@@ -107,15 +118,12 @@ async def read_price(
 
 @router.delete("/price/{category_id}/{location_id}/{matrix_id}")
 async def delete_price(
-        category_id: int,
-        location_id: int,
-        matrix_id: int,
-        session: AsyncSession = Depends(get_sql_session),
+    category_id: int, location_id: int, matrix_id: int, session: AsyncSession = Depends(get_sql_session)
 ):
     try:
         await delete_price(
             session,
-            PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id)
+            PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id),
         )
     except IntegrityError:
         raise HTTPException(
@@ -128,17 +136,16 @@ async def delete_price(
 
 @router.post("/price")
 async def create_price(
-        request: PriceCreateRequest, session: AsyncSession = Depends(get_sql_session)
-) -> PriceReadCreateResponse:
+    request: PriceCreateRequest, session: AsyncSession = Depends(get_sql_session)
+) -> PriceResponse:
     try:
         price = await add_price(session, request)
     except IntegrityError as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
 
-    return PriceReadCreateResponse(
+    return PriceResponse(
         price=price.price,
         matrix_id=price.matrix_id,
         location_id=price.location_id,

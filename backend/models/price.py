@@ -18,7 +18,7 @@ class Price(Base):
     location_id: Mapped[int] = mapped_column(ForeignKey("locations.id", ondelete="cascade"), primary_key=True)
     location: Mapped[Location] = relationship(back_populates="prices")
 
-    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id", ondelete="cascade"), primary_key=True)
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("categories.id", ondelete="cascade"), primary_key=True
+    )
     category: Mapped[Category] = relationship(back_populates="prices")
-
-
