@@ -2,36 +2,35 @@ from typing import List
 
 from fastapi import HTTPException
 from redis.asyncio import Redis
-from redis.commands.json import JSON
 from starlette import status
 
 from schemas.storage import StorageConfResponse
 
 
 async def get_storage_conf(client: Redis) -> StorageConfResponse:
-    obj = await client.json().get('storage') or dict()
-    print(obj, await client.json().get('storage.baseline'))
-    if obj.get('baseline') is None:
+    if not await client.hget('storage', 'baseline'):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Storage wasn't set yet",
         )
 
     return StorageConfResponse(
-        baseline=await obj.get('baseline'),
-        discounts=await obj.get('discounts') or []
+        baseline=await client.hget('storage', 'baseline'),
+        discounts=await client.hget('storage', 'discounts') or []
     )
 
 
 async def set_baseline(client: Redis, baseline_id: int):
-    await client.json().set('baseline', 'storage', baseline_id)
+    await client.hset(
+        name='storage',
+        key='baseline',
+        value=baseline_id,
+    )
 
 
 async def add_discounts(client: Redis, discount_ids: List[int]):
-    discount_ids = set(discount_ids) | set(await client.json().get('$.storage.discounts'))
-    await client.json().set('discounts', 'storage', list(discount_ids))
+    await client.sadd('discounts', *set(discount_ids))
 
 
 async def remove_discounts(client: Redis, discount_ids: List[int]):
-    discount_ids = set(await client.json().get('$.storage.discounts')) - set(discount_ids)
-    await client.json().c('discounts', list(discount_ids))
+    await client.srem('discounts', *set(discount_ids))
