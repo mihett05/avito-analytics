@@ -10,7 +10,7 @@ MAX_RETRY_COUNT = 3
 
 def retries(func: Callable):
     async def _wrapper(*args, **kwargs):
-        retry = 0
+        retry = kwargs.pop('retry', 0)
         try:
             await func(*args, **kwargs, retry=retry)
         except exceptions.ConnectionError:
