@@ -8,12 +8,10 @@ import {
   useStore,
   StoreContextProvider,
 } from 'react-admin';
-import { Route } from 'react-router-dom';
 
 import { dataProvider } from '~/providers';
 import { i18nProvider } from './i18n';
 
-import StoragePage from '~/resources/storage';
 import CustomLayout from '~/layout/layout';
 
 import { LocationsEdit, LocationsList, LocationsShow } from '~/resources/locations';
@@ -52,10 +50,6 @@ function App() {
       />
       <Resource name="location" list={LocationsList} edit={LocationsEdit} show={LocationsShow} />
       <Resource name="category" list={CategoriesList} edit={CategoriesEdit} show={CategoriesShow} />
-
-      <CustomRoutes>
-        <Route path="/storage" element={<StoragePage />} />
-      </CustomRoutes>
     </Admin>
   );
 }

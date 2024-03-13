@@ -14,7 +14,7 @@ const MatrixEdit = () => {
   return (
     <Edit>
       <SimpleForm>
-        <NumberInput source="id" disabled />
+        <NumberInput source="id" />
         <TextInput source="name" />
         <TextInput source="type" />
         <NumberInput source="segment_id" />
