@@ -10,7 +10,7 @@ from schemas.matrices import MatrixCreateRequest, MatrixPutRequest
 
 
 async def get_matrices(session: AsyncSession, start: int = None, end: int = None) -> List[Matrix]:
-    page = end - start
+    page = end - start + 1
     result = await session.execute(select(Matrix).offset(page * (start // page)).limit(page))
 
     return [

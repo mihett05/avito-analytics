@@ -22,7 +22,7 @@ async def get_prices(
     start: int = 1,
     end: int = 50,
 ) -> List[Price]:
-    page = end - start
+    page = end - start + 1
     query = select(Price).offset(page * (start // page)).limit(page)
     if matrix_id:
         query = query.where(Price.matrix_id == matrix_id)
