@@ -1,23 +1,28 @@
 import React from 'react';
-import { Admin, EditGuesser, Resource, ShowGuesser } from 'react-admin';
-import { dataProvider } from '~/providers';
+import { Admin, CustomRoutes, EditGuesser, Resource, ShowGuesser } from 'react-admin';
+import { Route } from 'react-router-dom';
 
-import LocationsList from '../resources/locations/list';
-import CategoriesList from '~/resources/categories/list';
-import PricesList from '~/resources/prices/list';
-import MatriciesList from '~/resources/matricies/list';
-import LocationsEdit from '~/resources/locations/edit';
-import CategoriesEdit from '~/resources/categories/edit';
-import LocationsShow from '~/resources/locations/show';
-import CategoriesShow from '~/resources/categories/show';
+import { dataProvider } from '~/providers';
+import { i18nProvider } from './i18n';
+
+import StoragePage from '~/resources/storage';
+import CustomLayout from '~/layout/layout';
+
+import { LocationsEdit, LocationsList, LocationsShow } from '~/resources/locations';
+import { CategoriesEdit, CategoriesList, CategoriesShow } from '~/resources/categories';
+import { PricesList } from '~/resources/prices';
+import { MatricesList } from '~/resources/matrices';
 
 function App() {
   return (
-    <Admin dataProvider={dataProvider}>
+    <Admin dataProvider={dataProvider} layout={CustomLayout} i18nProvider={i18nProvider}>
       <Resource name="location" list={LocationsList} edit={LocationsEdit} show={LocationsShow} />
       <Resource name="category" list={CategoriesList} edit={CategoriesEdit} show={CategoriesShow} />
       <Resource name="price" list={PricesList} edit={EditGuesser} show={ShowGuesser} />
-      <Resource name="matrix" list={MatriciesList} edit={EditGuesser} show={ShowGuesser} />
+      <Resource name="matrix" list={MatricesList} edit={EditGuesser} show={ShowGuesser} />
+      <CustomRoutes>
+        <Route path="/storage" element={<StoragePage />} />
+      </CustomRoutes>
     </Admin>
   );
 }

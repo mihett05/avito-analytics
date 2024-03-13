@@ -1,8 +1,20 @@
 import React from 'react';
-import { List, Datagrid, TextField } from 'react-admin';
+import { List, Datagrid, TextField, TopToolbar, ExportButton } from 'react-admin';
+
+import { uploadLocationCsv } from '~/api/locations';
+import UploadButton from '~/shared/upload-button';
+
+const ListActions = () => {
+  return (
+    <TopToolbar>
+      <UploadButton onUpload={uploadLocationCsv} />
+      <ExportButton />
+    </TopToolbar>
+  );
+};
 
 export const LocationsList = () => (
-  <List>
+  <List actions={<ListActions />} empty={false}>
     <Datagrid rowClick="show">
       <TextField source="id" />
       <TextField source="name" />

@@ -1,8 +1,19 @@
 import React from 'react';
-import { List, Datagrid, TextField } from 'react-admin';
+import { List, Datagrid, TextField, TopToolbar, ExportButton } from 'react-admin';
+import { uploadCategotyCsv } from '~/api/categories';
+import UploadButton from '~/shared/upload-button';
+
+const ListActions = () => {
+  return (
+    <TopToolbar>
+      <UploadButton onUpload={uploadCategotyCsv} />
+      <ExportButton />
+    </TopToolbar>
+  );
+};
 
 export const CategoriesList = () => (
-  <List>
+  <List actions={<ListActions />} empty={false}>
     <Datagrid rowClick="show">
       <TextField source="id" />
       <TextField source="key" />

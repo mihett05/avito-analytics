@@ -1,7 +1,7 @@
 import React from 'react';
 import { List, Datagrid, TextField } from 'react-admin';
 
-export const MatriciesList = () => (
+export const MatricesList = () => (
   <List>
     <Datagrid rowClick="show">
       <TextField source="id" />
@@ -12,4 +12,4 @@ export const MatriciesList = () => (
   </List>
 );
 
-export default MatriciesList;
+export default MatricesList;

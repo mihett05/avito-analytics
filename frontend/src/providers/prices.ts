@@ -1,10 +1,6 @@
 import type { DataProvider, GetListResult } from 'react-admin';
-import axios from 'axios';
 import { Price } from '~/entities';
-
-const base = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE,
-});
+import { api } from '~/api/api';
 
 type PriceResponse = Omit<Price, 'id'>;
 
@@ -17,8 +13,7 @@ const getId = ({
 
 export const priceProvider: DataProvider = {
   getList: async (resource, params): Promise<GetListResult<Price>> => {
-    const response = await base.get('/price');
-    console.log(response);
+    const response = await api.get('/price');
     return {
       data: (response.data as PriceResponse[]).map(
         ({ category_id, location_id, matrix_id, price }: PriceResponse): Price => ({
