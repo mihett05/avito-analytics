@@ -6,7 +6,7 @@ function MatrixCreate() {
     <Create>
       <SimpleForm>
         <TextInput source="name" required />
-        <TextInput source="segment_id" required />
+        <TextInput source="segment_id" helperText="Для Baseline матрицы оставить пустым" />
         <FileInput source="file" isRequired />
       </SimpleForm>
     </Create>
