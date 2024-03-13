@@ -18,7 +18,7 @@ class MatrixCreateRequest(BaseModel):
 class MatrixPutRequest(BaseModel):
     id: int
     name: str
-    type: MatrixTypePydantic
+    type: Optional[MatrixTypePydantic]
     segment_id: Optional[int]
 
 

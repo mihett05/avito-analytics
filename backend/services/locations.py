@@ -10,7 +10,7 @@ from schemas.locations import LocationCreateRequest, LocationPutRequest
 
 
 async def get_locations(session: AsyncSession, start: int = None, end: int = None) -> List[Location]:
-    page = end - start
+    page = end - start + 1
     result = await session.execute(select(Location).offset(page * (start // page)).limit(page))
 
     return [

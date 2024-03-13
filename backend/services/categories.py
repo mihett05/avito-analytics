@@ -10,7 +10,7 @@ from schemas.categories import CategoryCreateRequest, CategoryPutRequest
 
 
 async def get_categories(session: AsyncSession, start: int = 1, end: int = 50) -> List[Category]:
-    page = end - start
+    page = end - start + 1
     result = await session.execute(select(Category).offset(page * (start // page)).limit(page))
 
     return [
