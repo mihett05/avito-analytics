@@ -31,7 +31,10 @@ export const priceProvider: DataProvider = {
     };
   },
   getManyReference: async (resource, params) => {
-    const response = await api.get<PriceResponse[]>(`/price/${params.id}`);
+    const { page, perPage } = params.pagination;
+    const response = await api.get<PriceResponse[]>(
+      `/price/${params.id}?_end=${perPage * page}&_start=${perPage * (page - 1)}`,
+    );
     return {
       data: handlePriceResponse(response.data),
       total: response.headers['X-Total-Count'],

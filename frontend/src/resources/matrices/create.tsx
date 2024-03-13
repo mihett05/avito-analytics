@@ -1,5 +1,5 @@
 import React from 'react';
-import { Create, SimpleForm, TextInput, FileInput, FileField } from 'react-admin';
+import { Create, SimpleForm, TextInput, FileInput } from 'react-admin';
 
 function MatrixCreate() {
   return (
