@@ -67,12 +67,7 @@ async def add_nodes_pack(session: AsyncSession, file: UploadFile, model: Type[Un
 
 async def add_prices(session: AsyncSession, file: UploadFile, matrix: Matrix):
     data = [
-        {
-            "price": int(row[2]),
-            "matrix_id": matrix.id,
-            "location_id": int(row[1]),
-            "category_id": int(row[0]),
-        }
+        {"price": int(row[2]), "matrix_id": matrix.id, "location_id": int(row[1]), "category_id": int(row[0])}
         for row in convertor(await file.read())
     ]
 

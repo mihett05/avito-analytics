@@ -16,7 +16,7 @@ from schemas.matrices import (
     MatrixTypePydantic,
     MatrixPutRequest,
 )
-from services.matrices import get_matrices, get_matrix, add_matrix, delete_matrix_by_id, update_matrix
+from services.matrices import get_matrices, get_matrix, add_matrix, delete_matrix_by_id, set_matrix
 from services.nodes import add_prices, delete_table
 from storage.storage_settings import get_storage_conf
 
@@ -38,12 +38,7 @@ async def read_matrices(
 ) -> List[MatrixResponse]:
     matrices = await get_matrices(session, start=_start, end=_end)
     return [
-        MatrixResponse(
-            id=matrix.id,
-            name=matrix.name,
-            type=matrix.type,
-            segment_id=matrix.segment_id,
-        )
+        MatrixResponse(id=matrix.id, name=matrix.name, type=matrix.type, segment_id=matrix.segment_id)
         for matrix in matrices
     ]
 
@@ -55,15 +50,12 @@ async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_se
 
 
 @router.put("/matrix/{matrix_id}")
-async def update_matrix_router(
-    location: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)
-):
+async def update_matrix(location: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)):
     try:
-        await update_matrix(session, location)
+        await set_matrix(session, location)
     except IntegrityError as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
     return {"status": status.HTTP_200_OK}
 
@@ -81,12 +73,10 @@ async def delete_matrix(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"You are trying to delete matrix from storage, please set it before deletion",
             )
+
         await delete_matrix_by_id(session, matrix_id)
     except IntegrityError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Matrix wasn't found",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Matrix wasn't found")
 
     return {"status": status.HTTP_200_OK}
 

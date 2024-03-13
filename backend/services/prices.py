@@ -30,10 +30,7 @@ async def get_prices(
     result = await session.execute(query)
     return [
         Price(
-            price=res.price,
-            matrix_id=res.matrix_id,
-            location_id=res.location_id,
-            category_id=res.category_id,
+            price=res.price, matrix_id=res.matrix_id, location_id=res.location_id, category_id=res.category_id
         )
         for res in result.scalars().all()
     ]
@@ -47,6 +44,7 @@ async def delete_price(session: AsyncSession, req: PriceReadRequest):
             Price.category_id == req.category_id,
         )
     )
+    await session.commit()
 
 
 async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
@@ -70,7 +68,7 @@ async def get_price(session: AsyncSession, req: PriceReadRequest) -> Price:
     )
 
 
-async def update_price(session: AsyncSession, price: PricePutRequest):
+async def set_price(session: AsyncSession, price: PricePutRequest):
     await session.execute(
         update(Price)
         .where(
@@ -98,11 +96,7 @@ async def add_price(session: AsyncSession, price: PriceCreateRequest) -> Price:
 
 
 async def get_target_price(
-    session: AsyncSession,
-    user_id: int,
-    category_id: int,
-    location_id: int,
-    redis_session: Redis,
+    session: AsyncSession, user_id: int, category_id: int, location_id: int, redis_session: Redis
 ) -> PriceGetResponse:
     locations = list(map(int, (await get_location(session, location_id)).key.split("-")))
     categories = list(map(int, (await get_category(session, category_id)).key.split("-")))

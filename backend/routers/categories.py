@@ -1,15 +1,14 @@
 from typing import List, Dict, Annotated
 
 from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
-from fastapi_pagination import add_pagination
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from deps.pagination import ModelTotalCount
 
+from deps.pagination import ModelTotalCount
 from deps.sql_session import get_sql_session
 from models.category import Category
 from schemas.categories import CategoryCreateRequest, CategoryResponse, CategoryPutRequest
-from services.categories import get_categories, get_category, add_category, update_category
+from services.categories import get_categories, get_category, add_category, set_category
 from services.nodes import add_nodes_pack, delete_table, delete_instance
 
 router = APIRouter(tags=["categories"])
@@ -32,12 +31,7 @@ async def read_categories(
 ) -> List[CategoryResponse]:
     categories = await get_categories(session, start=_start, end=_end)
     return [
-        CategoryResponse(
-            id=category.id,
-            key=category.key,
-            name=category.name,
-            parent_id=category.parent_id,
-        )
+        CategoryResponse(id=category.id, key=category.key, name=category.name, parent_id=category.parent_id)
         for category in categories
     ]
 
@@ -48,23 +42,17 @@ async def read_category(
 ) -> CategoryResponse:
     category = await get_category(session, category_id)
     return CategoryResponse(
-        id=category.id,
-        key=category.key,
-        name=category.name,
-        parent_id=category.parent_id,
+        id=category.id, key=category.key, name=category.name, parent_id=category.parent_id
     )
 
 
 @router.put("/category/{category_id}")
-async def update_category_router(
-    category: CategoryPutRequest, session: AsyncSession = Depends(get_sql_session)
-):
+async def update_category(category: CategoryPutRequest, session: AsyncSession = Depends(get_sql_session)):
     try:
-        await update_category(session, category)
+        await set_category(session, category)
     except IntegrityError as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
     return {"status": status.HTTP_200_OK}
 
@@ -83,14 +71,10 @@ async def create_category(
         category = await add_category(session, request)
     except (IntegrityError, ValueError) as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
     return CategoryResponse(
-        id=category.id,
-        key=category.key,
-        name=category.name,
-        parent_id=category.parent_id,
+        id=category.id, key=category.key, name=category.name, parent_id=category.parent_id
     )
 
 
@@ -100,8 +84,7 @@ async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sql_s
         await add_nodes_pack(session, file, Category)
     except IntegrityError as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
 
     return {"status": status.HTTP_200_OK}

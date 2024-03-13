@@ -16,10 +16,11 @@ from schemas.prices import (
     PriceReadRequest,
     PriceCreateRequest,
     PriceGetRequest,
-    PriceGetResponse, PricePutRequest,
+    PriceGetResponse,
+    PricePutRequest,
 )
 from services.nodes import delete_table
-from services.prices import get_prices, get_price, add_price, get_target_price, update_price
+from services.prices import get_prices, get_price, add_price, get_target_price, set_price
 from storage.analytics import add_updates
 
 router = APIRouter(tags=["prices"])
@@ -87,15 +88,12 @@ async def read_prices_matrix(
 
 
 @router.put("/price")
-async def update_price_router(
-    location: PricePutRequest, session: AsyncSession = Depends(get_sql_session)
-):
+async def update_price_router(location: PricePutRequest, session: AsyncSession = Depends(get_sql_session)):
     try:
-        await update_price(session, location)
+        await set_price(session, location)
     except IntegrityError as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
     return {"status": status.HTTP_200_OK}
 
@@ -108,10 +106,8 @@ async def read_price(
     session: AsyncSession = Depends(get_sql_session),
 ) -> PriceResponse:
     price = await get_price(
-        session,
-        PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id),
+        session, PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id)
     )
-
     return PriceResponse(
         price=price.price,
         matrix_id=price.matrix_id,
@@ -122,10 +118,7 @@ async def read_price(
 
 @router.delete("/price/{category_id}/{location_id}/{matrix_id}")
 async def delete_price(
-    category_id: int,
-    location_id: int,
-    matrix_id: int,
-    session: AsyncSession = Depends(get_sql_session),
+    category_id: int, location_id: int, matrix_id: int, session: AsyncSession = Depends(get_sql_session)
 ):
     try:
         await delete_price(
@@ -149,8 +142,7 @@ async def create_price(
         price = await add_price(session, request)
     except IntegrityError as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
 
     return PriceResponse(

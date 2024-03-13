@@ -16,12 +16,7 @@ async def get_matrices(session: AsyncSession, start: int = None, end: int = None
     result = await session.execute(query)
 
     return [
-        Matrix(
-            id=res.id,
-            name=res.name,
-            type=res.type,
-            segment_id=res.segment_id,
-        )
+        Matrix(id=res.id, name=res.name, type=res.type, segment_id=res.segment_id)
         for res in result.scalars().all()
     ]
 
@@ -34,7 +29,7 @@ async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
     return Matrix(id=res.id, name=res.name, type=res.type, segment_id=res.segment_id)
 
 
-async def update_matrix(session: AsyncSession, matrix: MatrixPutRequest):
+async def set_matrix(session: AsyncSession, matrix: MatrixPutRequest):
     await session.execute(
         update(Matrix)
         .where(Matrix.id == matrix.id)
@@ -52,22 +47,13 @@ async def get_matrix__id_in(
 ) -> List[Matrix]:
     result = await session.execute(select(Matrix).where(Matrix.id.in_(ides), Matrix.type == matrix_type))
     return [
-        Matrix(
-            id=res.id,
-            name=res.name,
-            type=res.type,
-            segment_id=res.segment_id,
-        )
+        Matrix(id=res.id, name=res.name, type=res.type, segment_id=res.segment_id)
         for res in result.scalars().all()
     ]
 
 
 async def add_matrix(session: AsyncSession, matrix: MatrixCreateRequest) -> Matrix:
-    new_matrix = Matrix(
-        name=matrix.name,
-        type=matrix.type,
-        segment_id=matrix.segment_id,
-    )
+    new_matrix = Matrix(name=matrix.name, type=matrix.type, segment_id=matrix.segment_id)
 
     session.add(new_matrix)
     await session.commit()

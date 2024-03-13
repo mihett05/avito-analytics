@@ -9,14 +9,10 @@ from schemas.storage import StorageConfResponse
 
 async def get_storage_conf(client: Redis) -> StorageConfResponse:
     if not await client.get("baseline"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Storage wasn't set yet",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Storage wasn't set yet")
 
     return StorageConfResponse(
-        baseline=await client.get("baseline"),
-        discounts=await client.smembers("discounts") or [],
+        baseline=await client.get("baseline"), discounts=await client.smembers("discounts") or []
     )
 
 

@@ -8,7 +8,7 @@ from deps.pagination import ModelTotalCount
 from deps.sql_session import get_sql_session
 from models.location import Location
 from schemas.locations import LocationCreateRequest, LocationResponse, LocationPutRequest
-from services.locations import get_locations, get_location, add_location, update_location
+from services.locations import get_locations, get_location, add_location, set_location
 from services.nodes import add_nodes_pack, delete_table, delete_instance
 
 router = APIRouter(tags=["locations"])
@@ -31,12 +31,7 @@ async def read_locations(
 ) -> List[LocationResponse]:
     locations = await get_locations(session, start=_start, end=_end)
     return [
-        LocationResponse(
-            id=location.id,
-            key=location.key,
-            name=location.name,
-            parent_id=location.parent_id,
-        )
+        LocationResponse(id=location.id, key=location.key, name=location.name, parent_id=location.parent_id)
         for location in locations
     ]
 
@@ -47,23 +42,17 @@ async def read_location(
 ) -> LocationResponse:
     location = await get_location(session, location_id)
     return LocationResponse(
-        id=location.id,
-        key=location.key,
-        name=location.name,
-        parent_id=location.parent_id,
+        id=location.id, key=location.key, name=location.name, parent_id=location.parent_id
     )
 
 
 @router.put("/location/{location_id}")
-async def update_location_router(
-    location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)
-):
+async def update_location(location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)):
     try:
-        await update_location(session, location)
+        await set_location(session, location)
     except IntegrityError as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
     return {"status": status.HTTP_200_OK}
 
@@ -82,15 +71,11 @@ async def create_location(
         location = await add_location(session, request)
     except (IntegrityError, ValueError) as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
 
     return LocationResponse(
-        id=location.id,
-        key=location.key,
-        name=location.name,
-        parent_id=location.parent_id,
+        id=location.id, key=location.key, name=location.name, parent_id=location.parent_id
     )
 
 
@@ -100,8 +85,7 @@ async def upload_csv(file: UploadFile, session: AsyncSession = Depends(get_sql_s
         await add_nodes_pack(session, file, Location)
     except IntegrityError as err:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid parent id\nMore info:\n\n{err}",
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
 
     return {"status": status.HTTP_200_OK}

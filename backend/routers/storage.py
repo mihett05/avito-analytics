@@ -45,10 +45,7 @@ async def set_discounts(
 ):
     discounts = await get_matrix__id_in(session, ides=discount.discounts)
     if not discounts:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid discount matrix ides",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid discount matrix ides")
 
     await engine.add_discounts(redis_session, list(map(lambda x: x.id, discounts)))
     return {"status": status.HTTP_200_OK}

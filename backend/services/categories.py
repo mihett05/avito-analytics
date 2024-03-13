@@ -16,18 +16,17 @@ async def get_categories(session: AsyncSession, start: int = None, end: int = No
     result = await session.execute(query)
 
     return [
-        Category(
-            id=res.id,
-            key=res.key,
-            name=res.name,
-            parent_id=res.parent_id,
-        )
+        Category(id=res.id, key=res.key, name=res.name, parent_id=res.parent_id)
         for res in result.scalars().all()
     ]
 
 
-async def update_category(session: AsyncSession, category: CategoryPutRequest):
-    await session.execute(update(Category).where(Category.id == category.id).values(name=category.name))
+async def set_category(session: AsyncSession, category: CategoryPutRequest):
+    await session.execute(
+        update(Category)
+        .where(Category.id == category.id)
+        .values(name=category.name, parent_id=category.parent_id)
+    )
     await session.commit()
 
 
@@ -36,12 +35,7 @@ async def get_category(session: AsyncSession, category_id: int) -> Category:
     if not result:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid category id")
 
-    return Category(
-        id=result.id,
-        key=result.key,
-        name=result.name,
-        parent_id=result.parent_id,
-    )
+    return Category(id=result.id, key=result.key, name=result.name, parent_id=result.parent_id)
 
 
 async def add_category(session: AsyncSession, category: CategoryCreateRequest) -> Category:
