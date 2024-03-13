@@ -32,7 +32,7 @@ def put_dict_in_order(data: dict, need_sort=True):
 async def get_analytics(client: Redis):
     obj = dict()
 
-    obj['total_requests'] = int(await client.get('total_requests'))
+    obj['total_requests'] = int(await client.get('total_requests') or 0)
     obj['dates'] = put_dict_in_order(await client.hgetall('dates') or {}, need_sort=False)
     obj['locations'] = put_dict_in_order(await client.hgetall('locations') or {})
     obj['categories'] = put_dict_in_order(await client.hgetall('categories') or {})
