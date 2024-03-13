@@ -24,7 +24,7 @@ async def get_matrices(session: AsyncSession, start: int = None, end: int = None
 
 
 async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
-    res = (await session.execute(select(Matrix).where(Matrix.id == matrix_id, Matrix.type == MatrixTypeEnum.DISCOUNT))).scalar()
+    res = (await session.execute(select(Matrix).where(Matrix.id == matrix_id))).scalar()
     if not res:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="matrix wasn't found")
 

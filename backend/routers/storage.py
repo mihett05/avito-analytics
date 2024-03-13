@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from deps.redis_session import get_redis_session
-import storage.engine as engine
+import storage.storage_settings as engine
 from deps.sql_session import get_sql_session
 from schemas.storage import AddDeleteDiscountsRequest, StorageConfResponse
 from services.matrices import get_matrix, get_matrix__id_in
