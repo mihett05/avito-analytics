@@ -53,7 +53,7 @@ async def read_prices(
         _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[PriceReadCreateResponse]:
-    prices = await get_prices(session, start=1, end=50, )
+    prices = await get_prices(session, start=_start, end=_end)
     return [
         PriceReadCreateResponse(
             price=price.price,
@@ -79,7 +79,7 @@ async def read_prices_matrix(
             location_id=price.location_id,
             category_id=price.category_id,
         )
-        for price in await get_prices(session, matrix_id=matrix_id)
+        for price in await get_prices(session, matrix_id=matrix_id, start=_start, end=_end)
     ]
 
 

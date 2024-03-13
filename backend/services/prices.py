@@ -16,13 +16,16 @@ from storage.storage_settings import get_storage_conf
 from typing import Optional
 
 
-async def get_prices(session: AsyncSession, matrix_id: Optional[int] = None, start: int = 1, end: int = 50) -> List[Price]:
-    page = end - start + 1
+async def get_prices(
+        session: AsyncSession,
+        matrix_id: Optional[int] = None,
+        start: int = 1,
+        end: int = 50
+) -> List[Price]:
+    page = end - start
     query = select(Price).offset(page * (start // page)).limit(page)
     if matrix_id:
         query = query.where(Price.matrix_id == matrix_id)
-
-
 
     result = await session.execute(query)
     return [

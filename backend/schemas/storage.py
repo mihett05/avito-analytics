@@ -8,5 +8,5 @@ class StorageConfResponse(BaseModel):
     discounts: List[int]
 
 
-class AddDeleteDiscountsRequest(BaseModel):
+class SetDiscountsRequest(BaseModel):
     discounts: List[int]

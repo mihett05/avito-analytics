@@ -25,6 +25,7 @@ async def set_baseline(client: Redis, baseline_id: int):
 
 
 async def add_discounts(client: Redis, discount_ids: List[int]):
+    await client.delete('discounts')
     await client.sadd('discounts', *set(discount_ids))
 
 
