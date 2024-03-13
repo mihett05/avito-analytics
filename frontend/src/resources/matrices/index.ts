@@ -1,3 +1,4 @@
 import MatricesList from './list';
+import MatrixCreate from './create';
 
-export { MatricesList };
+export { MatricesList, MatrixCreate };

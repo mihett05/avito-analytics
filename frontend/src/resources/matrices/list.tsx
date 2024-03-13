@@ -1,9 +1,9 @@
 import React from 'react';
-import { List, Datagrid, TextField } from 'react-admin';
+import { List, Datagrid, TextField, TopToolbar, ExportButton } from 'react-admin';
 
 export const MatricesList = () => (
-  <List>
-    <Datagrid rowClick="show">
+  <List empty={false}>
+    <Datagrid rowClick="edit">
       <TextField source="id" />
       <TextField source="name" />
       <TextField source="type" />

@@ -10,7 +10,7 @@ const ru = {
     category: {
       name: 'Категории',
     },
-    price: {
+    matrix: {
       name: 'Матрицы цен',
     },
   },
