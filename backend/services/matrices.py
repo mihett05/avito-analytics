@@ -36,8 +36,8 @@ async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
     )
 
 
-async def get_matrix__id_in(session: AsyncSession, discounts: List[int]) -> List[Matrix]:
-    result = await session.execute(select(Matrix).where(Matrix.id.in_(discounts)))
+async def get_matrix__id_in(session: AsyncSession, ides: List[int], matrix_type: str = MatrixTypeEnum.DISCOUNT) -> List[Matrix]:
+    result = await session.execute(select(Matrix).where(Matrix.id.in_(ides), Matrix.type == matrix_type))
     return [Matrix(
         id=res.id,
         name=res.name,

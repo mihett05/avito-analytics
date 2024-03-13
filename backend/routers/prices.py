@@ -1,3 +1,4 @@
+import asyncio
 from typing import Annotated, List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -18,6 +19,7 @@ from schemas.prices import (
 )
 from services.nodes import delete_table
 from services.prices import get_prices, get_price, add_price, get_target_price
+from storage.analytics import add_updates
 
 router = APIRouter(tags=["prices"])
 
@@ -28,6 +30,8 @@ async def calculate_target_price(
         session: AsyncSession = Depends(get_sql_session),
         redis_session: Redis = Depends(get_redis_session)
 ) -> PriceGetResponse:
+    asyncio.create_task(add_updates(redis_session, request.location_id, request.category_id))
+
     return await get_target_price(
         session=session,
         user_id=request.user_id,
@@ -46,9 +50,10 @@ async def delete_all_prices(session: AsyncSession = Depends(get_sql_session)) ->
 @router.get("/price")
 async def read_prices(
         total: Annotated[int, Depends(ModelTotalCount(Price))],
+        _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[PriceReadCreateResponse]:
-    prices = await get_prices(session)
+    prices = await get_prices(session, start=_start, end=_end)
     return [
         PriceReadCreateResponse(
             price=price.price,
@@ -64,6 +69,7 @@ async def read_prices(
 async def read_prices_matrix(
         matrix_id: int,
         total: Annotated[int, Depends(ModelTotalCount(Price))],
+        _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[PriceReadCreateResponse]:
     return [
@@ -73,7 +79,7 @@ async def read_prices_matrix(
             location_id=price.location_id,
             category_id=price.category_id,
         )
-        for price in await get_prices(session, matrix_id=matrix_id)
+        for price in await get_prices(session, matrix_id=matrix_id, start=_start, end=_end)
     ]
 
 
