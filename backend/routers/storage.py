@@ -6,6 +6,7 @@ from starlette import status
 from deps.redis_session import get_redis_session
 import storage.storage_settings as engine
 from deps.sql_session import get_sql_session
+from models.matrix import MatrixTypeEnum
 from schemas.storage import SetDiscountsRequest, StorageConfResponse
 from services.matrices import get_matrix, get_matrix__id_in
 from storage.analytics import get_analytics
@@ -31,7 +32,10 @@ async def set_baseline(
     redis_session: Redis = Depends(get_redis_session),
     session: AsyncSession = Depends(get_sql_session),
 ):
-    await get_matrix(session, baseline)
+    matrix = await get_matrix(session, baseline)
+    if not matrix.type == MatrixTypeEnum.BASE:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid baseline matrix id")
+
 
     await engine.set_baseline(redis_session, baseline)
     return {"status": status.HTTP_200_OK}
