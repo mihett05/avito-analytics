@@ -1,14 +1,39 @@
+import datetime
+from asyncio import sleep
+from typing import Callable
+
 from redis.asyncio import Redis
+from redis import exceptions
+
+MAX_RETRY_COUNT = 3
 
 
-def put_dict_in_order(data: dict):
-    return {k: v for k, v in sorted(map(lambda x: (x[0], int(x[1])), data.items()), key=lambda x: x[-1])}
+def retries(func: Callable):
+    async def _wrapper(*args, **kwargs):
+        retry = 0
+        try:
+            await func(*args, **kwargs, retry=retry)
+        except exceptions.ConnectionError:
+            print(f'{func.__name__}, retry={retry}')
+            await sleep(.5)
+            await func(*args, **kwargs, retry=retry + 1)
+
+    return _wrapper
+
+
+def put_dict_in_order(data: dict, need_sort=True):
+    data = map(lambda x: (x[0], int(x[1])), data.items())
+
+    if need_sort:
+        return {k: v for k, v in sorted(data, key=lambda x: x[-1]) if k != b'-1'}
+    return {k: v for k, v in data if k != b'-1'}
 
 
 async def get_analytics(client: Redis):
-    obj = await client.hgetall('analytics')
+    obj = dict()
 
-    obj['total_requests'] = int(obj.get('total_requests', 0))
+    obj['total_requests'] = int(await client.get('total_requests'))
+    obj['dates'] = put_dict_in_order(await client.hgetall('dates') or {}, need_sort=False)
     obj['locations'] = put_dict_in_order(await client.hgetall('locations') or {})
     obj['categories'] = put_dict_in_order(await client.hgetall('categories') or {})
 
@@ -16,19 +41,42 @@ async def get_analytics(client: Redis):
 
 
 async def add_updates(client: Redis, location_id: int, category_id: int):
+    await update_date_request(client)
     await update_total_requests(client)
     await update_locations_requests(client, location_id)
     await update_categories_requests(client, category_id)
 
 
-async def update_total_requests(client: Redis):
-    if not await client.hgetall('analytics'):
-        await client.hset('analytics', mapping={"total_requests": 0})
+@retries
+async def update_total_requests(client: Redis, retry=0):
+    if retry > MAX_RETRY_COUNT:
+        return
 
-    await client.hincrby(name="analytics", key="total_requests", amount=1)
+    if not await client.get('total_requests'):
+        await client.set('total_requests', 0)
+
+    await client.incrby(name="total_requests", amount=1)
 
 
-async def update_locations_requests(client: Redis, location_id: int):
+@retries
+async def update_date_request(client: Redis, retry=0):
+    if retry > MAX_RETRY_COUNT:
+        return
+
+    key = datetime.date.today().strftime("%m.%d.%Y")
+    if not await client.hget('dates', '-1'):
+        await client.hset('dates', mapping={'-1': -1})
+
+    if not await client.hget('dates', key):
+        await client.hset('dates', key=key, value=0)
+    await client.hincrby(name='dates', key=key, amount=1)
+
+
+@retries
+async def update_locations_requests(client: Redis, location_id: int, retry=0):
+    if retry > MAX_RETRY_COUNT:
+        return
+
     if not await client.hget('locations', '-1'):
         await client.hset('locations', mapping={'-1': -1})
 
@@ -37,7 +85,11 @@ async def update_locations_requests(client: Redis, location_id: int):
     await client.hincrby(name="locations", key=str(location_id), amount=1)
 
 
-async def update_categories_requests(client: Redis, category_id: int):
+@retries
+async def update_categories_requests(client: Redis, category_id: int, retry=0):
+    if retry > MAX_RETRY_COUNT:
+        return
+
     if not await client.hget('categories', '-1'):
         await client.hset('categories', mapping={'-1': -1})
 
