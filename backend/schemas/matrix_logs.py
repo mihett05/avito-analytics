@@ -10,11 +10,6 @@ class MatrixLogTypePydantic(str, Enum):
     DELETE = 'DELETE'
 
 
-class MatrixLogCreateRequest(BaseModel):
-    matrix_id: int
-    type: MatrixLogTypePydantic = MatrixLogTypePydantic.CREATE
-
-
 class MatrixLogResponse(BaseModel):
     id: int
     matrix_id: int

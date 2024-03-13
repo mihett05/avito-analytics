@@ -3,8 +3,7 @@ from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.matriciets_logs import MatrixLogs
-from schemas.matrix_logs import MatrixLogCreateRequest
+from models.matriciets_logs import MatrixLogs, MatrixLogsTypeEnum
 
 
 async def get_matrices_logs(session: AsyncSession, start: int = 1, end: int = 50) -> List[MatrixLogs]:
@@ -38,10 +37,10 @@ async def get_matrix_logs(session: AsyncSession, matrix_id: int, start: int = 1,
     ]
 
 
-async def add_matrix_log(session: AsyncSession, matrix: MatrixLogCreateRequest) -> MatrixLogs:
-    new_matrix = MatrixLogs(matrix_id=matrix.matrix_id, type=matrix.type)
+async def add_matrix_log(session: AsyncSession, matrix_id: int, matrix_type: MatrixLogsTypeEnum) -> MatrixLogs:
+    new_matrix_log = MatrixLogs(matrix_id=matrix_id, type=matrix_type)
 
-    session.add(new_matrix)
+    session.add(new_matrix_log)
     await session.commit()
 
-    return new_matrix
+    return new_matrix_log
