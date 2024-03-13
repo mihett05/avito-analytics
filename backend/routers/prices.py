@@ -1,3 +1,4 @@
+import asyncio
 from typing import Annotated, List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -18,6 +19,7 @@ from schemas.prices import (
 )
 from services.nodes import delete_table
 from services.prices import get_prices, get_price, add_price, get_target_price
+from storage.analytics import add_updates
 
 router = APIRouter(tags=["prices"])
 
@@ -28,6 +30,8 @@ async def calculate_target_price(
         session: AsyncSession = Depends(get_sql_session),
         redis_session: Redis = Depends(get_redis_session)
 ) -> PriceGetResponse:
+    asyncio.create_task(add_updates(redis_session, request.location_id, request.category_id))
+
     return await get_target_price(
         session=session,
         user_id=request.user_id,

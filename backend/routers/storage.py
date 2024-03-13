@@ -8,6 +8,7 @@ import storage.storage_settings as engine
 from deps.sql_session import get_sql_session
 from schemas.storage import AddDeleteDiscountsRequest, StorageConfResponse
 from services.matrices import get_matrix, get_matrix__id_in
+from storage.analytics import get_analytics
 
 router = APIRouter(tags=["storage"])
 
@@ -16,6 +17,10 @@ router = APIRouter(tags=["storage"])
 async def read_storage(redis_session: Redis = Depends(get_redis_session)) -> StorageConfResponse:
     return await engine.get_storage_conf(redis_session)
 
+
+@router.get("/storage/analytics")
+async def read_storage(redis_session: Redis = Depends(get_redis_session)):
+    return await get_analytics(redis_session)
 
 @router.post("/storage/baseline")
 async def set_baseline(
