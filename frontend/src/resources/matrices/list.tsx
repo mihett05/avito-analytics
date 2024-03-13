@@ -1,8 +1,9 @@
 import React from 'react';
-import { List, Datagrid, TextField, TopToolbar, ExportButton } from 'react-admin';
+import { List, Datagrid, TextField } from 'react-admin';
+import Storage from './storage';
 
 export const MatricesList = () => (
-  <List empty={false}>
+  <List empty={false} aside={<Storage />}>
     <Datagrid rowClick="edit">
       <TextField source="id" />
       <TextField source="name" />

@@ -33,7 +33,7 @@ export const priceProvider: DataProvider = {
   getManyReference: async (resource, params) => {
     const response = await api.get<PriceResponse[]>(`/price/${params.id}`);
     return {
-      data: handlePriceResponse(response.data).slice(0, 60),
+      data: handlePriceResponse(response.data),
       total: response.headers['X-Total-Count'],
     };
   },

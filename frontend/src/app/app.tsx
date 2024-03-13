@@ -1,5 +1,13 @@
 import React from 'react';
-import { Admin, CustomRoutes, Resource, ShowGuesser, localStorageStore, useStore, StoreContextProvider } from 'react-admin';
+import {
+  Admin,
+  CustomRoutes,
+  Resource,
+  ShowGuesser,
+  localStorageStore,
+  useStore,
+  StoreContextProvider,
+} from 'react-admin';
 import { Route } from 'react-router-dom';
 
 import { dataProvider } from '~/providers';
@@ -13,27 +21,28 @@ import { CategoriesEdit, CategoriesList, CategoriesShow } from '~/resources/cate
 import { MatricesList, MatrixCreate } from '~/resources/matrices';
 import MatrixEdit from '~/resources/matrices/edit';
 import { themes, ThemeName } from '~/themes/themes';
-import './global.css'
+import './global.css';
 import Dashboard from '~/resources/Dashboard';
 
-const store = localStorageStore(undefined, 'avito-analytics')
+const store = localStorageStore(undefined, 'avito-analytics');
 
 function App() {
   const [themeName] = useStore<ThemeName>('themeName', 'house');
-  const lightTheme = themes.find(theme => theme.name === themeName)?.light;
-  const darkTheme = themes.find(theme => theme.name === themeName)?.dark;
+  const lightTheme = themes.find((theme) => theme.name === themeName)?.light;
+  const darkTheme = themes.find((theme) => theme.name === themeName)?.dark;
   return (
     <Admin
       title=""
-      dataProvider={dataProvider} 
-      layout={CustomLayout} 
-      i18nProvider={i18nProvider} 
-      darkTheme={darkTheme} 
+      dataProvider={dataProvider}
+      layout={CustomLayout}
+      i18nProvider={i18nProvider}
+      darkTheme={darkTheme}
       lightTheme={lightTheme}
       store={store}
       dashboard={Dashboard}
       disableTelemetry
-      defaultTheme='light'>
+      defaultTheme="light"
+    >
       <Resource
         name="matrix"
         list={MatricesList}
@@ -41,16 +50,9 @@ function App() {
         show={ShowGuesser}
         create={MatrixCreate}
       />
-      <Resource 
-        name="location" 
-        list={LocationsList} 
-        edit={LocationsEdit} 
-        show={LocationsShow} />
-      <Resource 
-        name="category" 
-        list={CategoriesList} 
-        edit={CategoriesEdit} 
-        show={CategoriesShow} />
+      <Resource name="location" list={LocationsList} edit={LocationsEdit} show={LocationsShow} />
+      <Resource name="category" list={CategoriesList} edit={CategoriesEdit} show={CategoriesShow} />
+
       <CustomRoutes>
         <Route path="/storage" element={<StoragePage />} />
       </CustomRoutes>
@@ -60,7 +62,7 @@ function App() {
 
 const AppWrapper = () => (
   <StoreContextProvider value={store}>
-      <App />
+    <App />
   </StoreContextProvider>
 );
 

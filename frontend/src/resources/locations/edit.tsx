@@ -1,5 +1,5 @@
-import React from 'react'
-import { Edit, SimpleForm, TextInput } from 'react-admin'
+import React from 'react';
+import { Edit, SimpleForm, TextInput } from 'react-admin';
 
 const LocationsEdit = () => {
   return (
@@ -11,7 +11,7 @@ const LocationsEdit = () => {
         <TextInput source="parent_id" />
       </SimpleForm>
     </Edit>
-  )
-}
+  );
+};
 
-export default LocationsEdit
+export default LocationsEdit;
