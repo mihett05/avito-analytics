@@ -1,7 +1,19 @@
-import React from 'react';
-import { List, Datagrid, TextField, TopToolbar, ExportButton } from 'react-admin';
+import { CircularProgress } from '@mui/material';
+import React, { useMemo } from 'react';
+import {
+  List,
+  Datagrid,
+  TextField,
+  TopToolbar,
+  ExportButton,
+  AutocompleteInput,
+  ReferenceInput,
+  SelectField,
+} from 'react-admin';
+import { useQuery } from 'react-query';
 
-import { uploadLocationCsv } from '~/api/locations';
+import { getLocations, uploadLocationCsv } from '~/api/locations';
+import { useNodeChoices } from '~/shared/hooks/use-node-choices';
 import UploadButton from '~/shared/upload-button';
 
 const ListActions = () => {
@@ -13,15 +25,17 @@ const ListActions = () => {
   );
 };
 
-export const LocationsList = () => (
-  <List actions={<ListActions />} empty={false}>
-    <Datagrid rowClick="show">
-      <TextField source="id" />
-      <TextField source="name" />
-      <TextField source="parent_id" />
-      <TextField source="key" />
-    </Datagrid>
-  </List>
-);
+export const LocationsList = () => {
+  const { choices } = useNodeChoices('location', () => getLocations());
+  return (
+    <List actions={<ListActions />} empty={false}>
+      <Datagrid rowClick="edit">
+        <TextField source="id" />
+        <TextField source="name" />
+        <SelectField source="parent_id" choices={choices} />
+      </Datagrid>
+    </List>
+  );
+};
 
 export default LocationsList;

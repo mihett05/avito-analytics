@@ -1,6 +1,7 @@
 import React from 'react';
-import { List, Datagrid, TextField, TopToolbar, ExportButton } from 'react-admin';
-import { uploadCategotyCsv } from '~/api/categories';
+import { List, Datagrid, TextField, TopToolbar, ExportButton, SelectField } from 'react-admin';
+import { getCategories, uploadCategotyCsv } from '~/api/categories';
+import { useNodeChoices } from '~/shared/hooks/use-node-choices';
 import UploadButton from '~/shared/upload-button';
 
 const ListActions = () => {
@@ -12,15 +13,17 @@ const ListActions = () => {
   );
 };
 
-export const CategoriesList = () => (
-  <List actions={<ListActions />} empty={false}>
-    <Datagrid rowClick="show">
-      <TextField source="id" />
-      <TextField source="key" />
-      <TextField source="name" />
-      <TextField source="parent_id" />
-    </Datagrid>
-  </List>
-);
+export const CategoriesList = () => {
+  const { choices } = useNodeChoices('location', () => getCategories());
+  return (
+    <List actions={<ListActions />} empty={false}>
+      <Datagrid rowClick="edit">
+        <TextField source="id" />
+        <TextField source="name" />
+        <SelectField source="parent_id" choices={choices} />
+      </Datagrid>
+    </List>
+  );
+};
 
 export default CategoriesList;

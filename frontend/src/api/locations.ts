@@ -1,7 +1,8 @@
 import { api } from './api';
+import type { Node } from '~/entities';
 
 export const getLocations = async () => {
-  const response = await api.get<Node[]>('/location');
+  const response = await api.get<Node[]>('/location?_start=0&_end=10000');
   if (response.status !== 200) {
     throw new Error('Невозможно получить локации');
   }

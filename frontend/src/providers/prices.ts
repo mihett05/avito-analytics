@@ -27,7 +27,7 @@ export const priceProvider: DataProvider = {
     const response = await api.get<PriceResponse[]>('/price');
     return {
       data: handlePriceResponse(response.data),
-      total: response.headers['X-Total-Count'],
+      total: response.headers['x-total-count'],
     };
   },
   getManyReference: async (resource, params) => {
@@ -37,7 +37,7 @@ export const priceProvider: DataProvider = {
     );
     return {
       data: handlePriceResponse(response.data),
-      total: response.headers['X-Total-Count'],
+      total: response.headers['x-total-count'],
     };
   },
 };

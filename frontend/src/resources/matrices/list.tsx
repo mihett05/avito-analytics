@@ -1,5 +1,13 @@
 import React from 'react';
-import { List, Datagrid, TextField, TopToolbar, CreateButton, ExportButton } from 'react-admin';
+import {
+  List,
+  Datagrid,
+  TextField,
+  TopToolbar,
+  CreateButton,
+  ExportButton,
+  SelectField,
+} from 'react-admin';
 import Storage from './storage/storage';
 
 const ListActions = () => {
@@ -16,7 +24,13 @@ export const MatricesList = () => (
     <Datagrid rowClick="edit">
       <TextField source="id" />
       <TextField source="name" />
-      <TextField source="type" />
+      <SelectField
+        source="type"
+        choices={[
+          { id: 'BASE', name: 'Основная' },
+          { id: 'DISCOUNT', name: 'Скидочная' },
+        ]}
+      />
       <TextField source="segment_id" />
     </Datagrid>
   </List>
