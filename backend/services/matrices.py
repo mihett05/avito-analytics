@@ -10,10 +10,8 @@ from schemas.matrices import MatrixCreateRequest, MatrixPutRequest
 
 
 async def get_matrices(session: AsyncSession, start: int = None, end: int = None) -> List[Matrix]:
-    query = select(Matrix)
-    if start is not None and end is not None:
-        query = query.where(start <= Matrix.id, Matrix.id <= end)
-    result = await session.execute(query)
+    page = end - start
+    result = await session.execute(select(Matrix).offset(page * (start // page)).limit(page))
 
     return [
         Matrix(id=res.id, name=res.name, type=res.type, segment_id=res.segment_id)

@@ -10,10 +10,8 @@ from schemas.locations import LocationCreateRequest, LocationPutRequest
 
 
 async def get_locations(session: AsyncSession, start: int = None, end: int = None) -> List[Location]:
-    query = select(Location)
-    if start is not None and end is not None:
-        query = query.where(start <= Location.id, Location.id <= end)
-    result = await session.execute(query)
+    page = end - start
+    result = await session.execute(select(Location).offset(page * (start // page)).limit(page))
 
     return [
         Location(id=res.id, key=res.key, name=res.name, parent_id=res.parent_id)
