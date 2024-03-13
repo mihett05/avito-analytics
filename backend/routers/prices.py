@@ -69,6 +69,7 @@ async def read_prices(
 async def read_prices_matrix(
         matrix_id: int,
         total: Annotated[int, Depends(ModelTotalCount(Price))],
+        _start: int = 1, _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
 ) -> List[PriceReadCreateResponse]:
     return [
