@@ -1,6 +1,6 @@
 import { CircularProgress } from '@mui/material';
 import React from 'react';
-import { AutocompleteInput, Edit, SimpleForm, TextInput } from 'react-admin';
+import { AutocompleteInput, Edit, NumberInput, SimpleForm, TextInput } from 'react-admin';
 import { getLocations } from '~/api/locations';
 import { useNodeChoices } from '~/shared/hooks/use-node-choices';
 

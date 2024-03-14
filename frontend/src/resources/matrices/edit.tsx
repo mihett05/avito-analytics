@@ -29,7 +29,7 @@ const MatrixEdit = () => {
     choices: locations,
     isLoading: isLocationsLoading,
     error: locationsError,
-  } = useNodeChoices('category', () => getLocations());
+  } = useNodeChoices('location', () => getLocations());
 
   if (isCategoriesLoading || isLocationsLoading) {
     return <CircularProgress />;
@@ -53,6 +53,7 @@ const MatrixEdit = () => {
                 { id: 'DISCOUNT', name: 'Скидочная' },
               ]}
               isRequired
+              disabled
             />
             <NumberInput source="segment_id" />
             <SaveButton />

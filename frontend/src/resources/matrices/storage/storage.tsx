@@ -24,7 +24,8 @@ function Storage() {
     }
     return !(
       data.baseline === form.baseline &&
-      data.discounts.every((value, index) => form.discounts[index] === value)
+      data.discounts.every((value, index) => form.discounts[index] === value) &&
+      data.discounts.length === form.discounts.length
     );
   }, [data, form]);
 

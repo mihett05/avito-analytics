@@ -40,4 +40,35 @@ export const priceProvider: DataProvider = {
       total: response.headers['x-total-count'],
     };
   },
+  getOne: async (resource, params) => {
+    const [category_id, location_id, matrix_id] = `${params.id}`
+      .split('-')
+      .map((el) => parseInt(el, 10));
+    const response = await api.get<PriceResponse>(
+      `/price/${location_id}/${category_id}/${matrix_id}`,
+    );
+
+    return {
+      data: { ...response.data, id: params.id },
+    };
+  },
+  update: async (resource, params) => {
+    const { price, id } = params.data;
+    const [location_id, category_id, matrix_id] = `${id}`.split('-').map((el) => parseInt(el, 10));
+    console.log({
+      category_id,
+      location_id,
+      matrix_id,
+      price,
+    });
+    await api.put('/price', {
+      category_id,
+      location_id,
+      matrix_id,
+      price,
+    });
+    return {
+      data: (await priceProvider.getOne(resource, params)).data,
+    };
+  },
 };

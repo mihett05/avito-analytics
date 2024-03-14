@@ -8,6 +8,8 @@ function CustomMenu() {
       <Menu.ResourceItem name="matrix" />
       <Menu.ResourceItem name="location" />
       <Menu.ResourceItem name="category" />
+      <Menu.ResourceItem name="storage_logs" />
+      <Menu.ResourceItem name="matrix_logs" />
     </Menu>
   );
 }

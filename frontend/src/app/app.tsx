@@ -21,6 +21,9 @@ import MatrixEdit from '~/resources/matrices/edit';
 import { themes, ThemeName } from '~/themes/themes';
 import './global.css';
 import Dashboard from '~/resources/Dashboard';
+import PriceEdit from '~/resources/prices/edit';
+import StorageLogsList from '~/resources/storage-logs/list';
+import MatrixLogsList from '~/matrix_logs/list';
 
 const store = localStorageStore(undefined, 'avito-analytics');
 
@@ -50,6 +53,9 @@ function App() {
       />
       <Resource name="location" list={LocationsList} edit={LocationsEdit} show={LocationsShow} />
       <Resource name="category" list={CategoriesList} edit={CategoriesEdit} show={CategoriesShow} />
+      <Resource name="price" edit={PriceEdit} />
+      <Resource name="storage_logs" list={StorageLogsList} />
+      <Resource name="matrix_logs" list={MatrixLogsList} />
     </Admin>
   );
 }

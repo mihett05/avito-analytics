@@ -34,6 +34,20 @@ const ru = {
         price: 'Цена',
       },
     },
+    storage_logs: {
+      name: 'Логи Storage',
+      fields: {
+        happened_at: 'Время',
+      },
+    },
+    matrix_logs: {
+      name: 'Логи матриц',
+      fields: {
+        matrix: 'Матрица',
+        type: 'Действие',
+        happened_at: 'Время',
+      },
+    },
   },
 };
 
