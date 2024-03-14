@@ -18,7 +18,7 @@ class MatrixLogs(Base):
     __tablename__ = "matrix_logs"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    matrix_id: Mapped[int] = mapped_column(ForeignKey("matrices.id", ondelete="nothing"), primary_key=False)
+    matrix_id: Mapped[int] = mapped_column(ForeignKey("matrices.id", ondelete="NO ACTION"), primary_key=False)
     happened_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     type: Mapped[ENUM] = mapped_column(
