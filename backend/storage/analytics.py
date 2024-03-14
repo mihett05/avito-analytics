@@ -1,5 +1,6 @@
 import datetime
 from asyncio import sleep
+from pprint import pprint
 from typing import Callable
 
 from redis.asyncio import Redis
@@ -22,11 +23,11 @@ def retries(func: Callable):
 
 
 def put_dict_in_order(data: dict, need_sort=True, count=30):
-    data = map(lambda x: (x[0], int(x[1])), data.items())
-
+    data = list(map(lambda x: (x[0].decode('utf8'), int(x[1])), data.items()))
     if need_sort:
-        return {k: v for k, v in sorted(data, key=lambda x: -x[-1])[:count] if k != b"-1"}
-    return {k: v for k, v in data if k != b"-1"}
+        data = sorted(data, key=lambda x: -x[1])
+
+    return {k: v for k, v in data[:count] if k != "-1"}
 
 
 async def get_analytics(client: Redis):
@@ -34,8 +35,8 @@ async def get_analytics(client: Redis):
 
     obj["total_requests"] = int(await client.get("total_requests") or 0)
     obj["dates"] = put_dict_in_order(await client.hgetall("dates") or {}, need_sort=False, count=30)
-    obj["locations"] = put_dict_in_order(await client.hgetall("locations") or {}, count=15)
-    obj["categories"] = put_dict_in_order(await client.hgetall("categories") or {}, count=15)
+    obj["locations"] = put_dict_in_order(await client.hgetall("locations") or {}, need_sort=True, count=15)
+    obj["categories"] = put_dict_in_order(await client.hgetall("categories") or {}, need_sort=True, count=15)
 
     return obj
 
