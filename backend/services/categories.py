@@ -23,7 +23,7 @@ async def set_category(session: AsyncSession, category: CategoryPutRequest):
     await session.execute(
         update(Category)
         .where(Category.id == category.id)
-        .values(name=category.name, parent_id=category.parent_id)
+        .values(name=category.name)
     )
     await session.commit()
 

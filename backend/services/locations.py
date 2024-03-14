@@ -23,7 +23,7 @@ async def set_location(session: AsyncSession, location: LocationPutRequest):
     await session.execute(
         update(Location)
         .where(Location.id == location.id)
-        .values(name=location.name, parent_id=location.parent_id)
+        .values(name=location.name)
     )
     await session.commit()
 

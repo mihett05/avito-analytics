@@ -10,6 +10,7 @@ from deps.pagination import ModelTotalCount
 from deps.redis_session import get_redis_session
 from deps.sql_session import get_sql_session
 from models import Matrix
+from models.matriciets_logs import MatrixLogsTypeEnum
 from schemas.matrices import (
     MatrixResponse,
     MatrixCreateRequest,
@@ -17,6 +18,7 @@ from schemas.matrices import (
     MatrixPutRequest,
 )
 from services.matrices import get_matrices, get_matrix, add_matrix, delete_matrix_by_id, set_matrix
+from services.matrix_logs import add_matrix_log
 from services.nodes import add_prices, delete_table
 from storage.storage_settings import get_storage_conf
 
@@ -31,10 +33,10 @@ async def delete_all_matrices(session: AsyncSession = Depends(get_sql_session)) 
 
 @router.get("/matrix")
 async def read_matrices(
-    total: Annotated[int, Depends(ModelTotalCount(Matrix))],
-    _start: int = 1,
-    _end: int = 50,
-    session: AsyncSession = Depends(get_sql_session),
+        total: Annotated[int, Depends(ModelTotalCount(Matrix))],
+        _start: int = 1,
+        _end: int = 50,
+        session: AsyncSession = Depends(get_sql_session),
 ) -> List[MatrixResponse]:
     matrices = await get_matrices(session, start=_start, end=_end)
     return [
@@ -50,9 +52,10 @@ async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_se
 
 
 @router.put("/matrix/{matrix_id}")
-async def update_matrix(location: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)):
+async def update_matrix(matrix: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)):
     try:
-        await set_matrix(session, location)
+        await set_matrix(session, matrix)
+        await add_matrix_log(session, matrix_id=matrix.id, matrix_type=MatrixLogsTypeEnum.UPDATE)
     except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
@@ -62,9 +65,9 @@ async def update_matrix(location: MatrixPutRequest, session: AsyncSession = Depe
 
 @router.delete("/matrix/{matrix_id}")
 async def delete_matrix(
-    matrix_id: int,
-    session: AsyncSession = Depends(get_sql_session),
-    redis_session: Redis = Depends(get_redis_session),
+        matrix_id: int,
+        session: AsyncSession = Depends(get_sql_session),
+        redis_session: Redis = Depends(get_redis_session),
 ):
     try:
         storage = await get_storage_conf(redis_session)
@@ -74,6 +77,7 @@ async def delete_matrix(
                 detail=f"You are trying to delete matrix from storage, please set it before deletion",
             )
 
+        await add_matrix_log(session, matrix_id=matrix_id, matrix_type=MatrixLogsTypeEnum.DELETE)
         await delete_matrix_by_id(session, matrix_id)
     except IntegrityError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Matrix wasn't found")
@@ -83,10 +87,10 @@ async def delete_matrix(
 
 @router.post("/matrix")
 async def create_matrix(
-    name: str,
-    file: UploadFile,
-    segment_id: Optional[int] = None,
-    session: AsyncSession = Depends(get_sql_session),
+        name: str,
+        file: UploadFile,
+        segment_id: Optional[int] = None,
+        session: AsyncSession = Depends(get_sql_session),
 ) -> MatrixResponse:
     try:
         # cat loc price
@@ -99,6 +103,7 @@ async def create_matrix(
             ),
         )  # add metadata
         await add_prices(session, file, matrix)  # add data
+        await add_matrix_log(session, matrix_id=matrix.id, matrix_type=MatrixLogsTypeEnum.CREATE)
 
     except IntegrityError as err:
         raise HTTPException(
