@@ -9,7 +9,7 @@ from models.matrix import Matrix, MatrixTypeEnum
 from schemas.matrices import MatrixCreateRequest, MatrixPutRequest
 
 
-async def get_matrices(session: AsyncSession, start: int = None, end: int = None) -> List[Matrix]:
+async def get_matrices(session: AsyncSession, start: int = 1, end: int = 50) -> List[Matrix]:
     page = end - start + 1
     result = await session.execute(select(Matrix).offset(page * (start // page)).limit(page))
 
