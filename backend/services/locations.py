@@ -20,8 +20,15 @@ async def get_locations(session: AsyncSession, start: int = 1, end: int = 50) ->
 
 
 async def set_location(session: AsyncSession, location_id: int, location: LocationPutRequest):
-    await session.execute(update(Location).where(Location.id == location_id).values(name=location.name))
+    result = (await session.execute(
+        update(Location)
+        .where(Location.id == location_id)
+        .values(name=location.name)
+        .returning(Location)
+    )).scalar()
     await session.commit()
+
+    return Location(id=result.id, key=result.key, name=result.name, parent_id=result.parent_id)
 
 
 async def get_location(session: AsyncSession, location_id: int) -> Location:

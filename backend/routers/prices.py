@@ -96,7 +96,7 @@ async def read_prices_matrix(
             matrix_id=price.matrix_id,
             location_id=price.location_id,
             category_id=price.category_id,
-        )
+        ).dict()
         for price in await get_prices(session, matrix_id=matrix_id, start=_start, end=_end)
     ]
 

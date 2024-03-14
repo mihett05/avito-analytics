@@ -20,24 +20,27 @@ async def get_matrices(session: AsyncSession, start: int = 1, end: int = 50) -> 
 
 
 async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
-    res = (await session.execute(select(Matrix).where(Matrix.id == matrix_id))).scalar()
-    if not res:
+    result = (await session.execute(select(Matrix).where(Matrix.id == matrix_id))).scalar()
+    if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="matrix wasn't found")
 
-    return Matrix(id=res.id, name=res.name, type=res.type, segment_id=res.segment_id)
+    return Matrix(id=result.id, name=result.name, type=result.type, segment_id=result.segment_id)
 
 
 async def set_matrix(session: AsyncSession, matrix_id: int, matrix: MatrixPutRequest):
-    await session.execute(
+    result = (await session.execute(
         update(Matrix)
         .where(Matrix.id == matrix_id)
         .values(
             name=matrix.name,
             segment_id=matrix.segment_id,
             type=MatrixTypeEnum.DISCOUNT if matrix.segment_id else MatrixTypeEnum.BASE,
-        )
-    )
+        ).returning(Matrix)
+    )).scalar()
     await session.commit()
+
+    return Matrix(id=result.id, name=result.name, type=result.type, segment_id=result.segment_id)
+
 
 
 async def get_matrix__id_in(

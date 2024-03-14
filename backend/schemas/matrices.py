@@ -17,8 +17,7 @@ class MatrixCreateRequest(BaseModel):
 
 class MatrixPutRequest(BaseModel):
     name: str
-    type: Optional[MatrixTypePydantic]
-    segment_id: Optional[int]
+    segment_id: Optional[int] = None
 
 
 class MatrixResponse(BaseModel):

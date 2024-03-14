@@ -68,14 +68,17 @@ async def read_category(
 @router.put("/category/{category_id}")
 async def update_category(
         category_id: int, category: CategoryPutRequest, session: AsyncSession = Depends(get_sql_session)
-):
+) -> CategoryResponse:
     try:
-        await set_category(session, category_id, category)
+        result = await set_category(session, category_id, category)
     except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
-    return {"status": status.HTTP_200_OK}
+
+    return CategoryResponse(
+        id=result.id, key=result.key, name=result.name, parent_id=result.parent_id
+    )
 
 
 @router.delete("/category")

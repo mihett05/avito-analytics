@@ -19,9 +19,15 @@ async def get_categories(session: AsyncSession, start: int = 1, end: int = 50) -
     ]
 
 
-async def set_category(session: AsyncSession, category_id: int, category: CategoryPutRequest):
-    await session.execute(update(Category).where(Category.id == category_id).values(name=category.name))
+async def set_category(session: AsyncSession, category_id: int, category: CategoryPutRequest) -> Category:
+    result = (await session.execute(
+        update(Category)
+        .where(Category.id == category_id)
+        .values(name=category.name)
+        .returning(Category)
+    )).scalar()
     await session.commit()
+    return Category(id=result.id, key=result.key, name=result.name, parent_id=result.parent_id)
 
 
 async def get_category(session: AsyncSession, category_id: int) -> Category:

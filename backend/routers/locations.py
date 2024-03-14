@@ -71,12 +71,14 @@ async def update_location(
         location_id: int, location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)
 ):
     try:
-        await set_location(session, location_id, location)
+        result = await set_location(session, location_id, location)
     except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
-    return {"status": status.HTTP_200_OK}
+    return LocationResponse(
+        id=result.id, key=result.key, name=result.name, parent_id=result.parent_id
+    )
 
 
 @router.delete("/location")
