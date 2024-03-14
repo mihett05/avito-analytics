@@ -14,7 +14,8 @@ async def get_storage_conf(client: Redis, need_raise=True) -> StorageConfRespons
         return StorageConfResponse(baseline=-1, discounts=[])
 
     return StorageConfResponse(
-        baseline=await client.get("baseline"), discounts=await client.smembers("discounts") or []
+        baseline=await client.get("baseline"),
+        discounts=await client.smembers("discounts") or []
     )
 
 
