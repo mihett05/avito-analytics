@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -12,6 +13,6 @@ class MatrixLogTypePydantic(str, Enum):
 
 class MatrixLogResponse(BaseModel):
     id: int
-    matrix_id: int
+    matrix_id: Optional[int]
     type: MatrixLogTypePydantic
     happened_at: datetime
