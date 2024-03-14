@@ -9,7 +9,7 @@ from models import Matrix
 from schemas.storage import StorageLogsResponse
 from services.storage_logs import get_storage_logs
 
-router = APIRouter(tags=["matrix_logs"])
+router = APIRouter(tags=["logs"])
 
 
 @router.get("/storage_logs")

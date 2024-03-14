@@ -9,7 +9,7 @@ from models import Matrix
 from schemas.matrix_logs import MatrixLogResponse
 from services.matrix_logs import get_matrices_logs, get_matrix_logs
 
-router = APIRouter(tags=["matrix_logs"])
+router = APIRouter(tags=["logs"])
 
 
 @router.get("/matrix_logs")
