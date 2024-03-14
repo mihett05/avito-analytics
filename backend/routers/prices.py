@@ -2,11 +2,12 @@ import asyncio
 from typing import Annotated, List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.openapi.models import Response
 from redis.asyncio import Redis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+from starlette.responses import JSONResponse
+
 from deps.pagination import ModelTotalCount
 
 from deps.redis_session import get_redis_session
@@ -88,7 +89,7 @@ async def read_prices_matrix(
         _start: int = 1,
         _end: int = 50,
         session: AsyncSession = Depends(get_sql_session),
-) -> Response:
+) -> JSONResponse:
     data = [
         PriceResponse(
             price=price.price,
@@ -99,7 +100,7 @@ async def read_prices_matrix(
         for price in await get_prices(session, matrix_id=matrix_id, start=_start, end=_end)
     ]
 
-    return Response(
+    return JSONResponse(
         content=data,
         headers={"Access-Control-Expose-Headers": "X-Total-Count", "X-Total-Count": str(len(data))},
     )
