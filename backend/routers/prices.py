@@ -29,9 +29,9 @@ router = APIRouter(tags=["prices"])
 
 @router.post("/price/target")
 async def calculate_target_price(
-        request: PriceGetRequest,
-        session: AsyncSession = Depends(get_sql_session),
-        redis_session: Redis = Depends(get_redis_session),
+    request: PriceGetRequest,
+    session: AsyncSession = Depends(get_sql_session),
+    redis_session: Redis = Depends(get_redis_session),
 ) -> PriceGetResponse:
     asyncio.create_task(add_updates(redis_session, request.location_id, request.category_id))
 
@@ -44,18 +44,12 @@ async def calculate_target_price(
     )
 
 
-@router.delete("/price")
-async def delete_all_prices(session: AsyncSession = Depends(get_sql_session)) -> Dict:
-    await delete_table(session, Price)
-    return {"status": status.HTTP_200_OK}
-
-
 @router.get("/price")
 async def read_prices(
-        total: Annotated[int, Depends(ModelTotalCount(Price))],
-        _start: int = 1,
-        _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    total: Annotated[int, Depends(ModelTotalCount(Price))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> List[PriceResponse]:
     prices = await get_prices(session, start=_start, end=_end)
     return [
@@ -103,12 +97,18 @@ async def update_price_router(location: PricePutRequest, session: AsyncSession =
     return {"status": status.HTTP_200_OK}
 
 
+@router.delete("/price")
+async def delete_all_prices(session: AsyncSession = Depends(get_sql_session)) -> Dict:
+    await delete_table(session, Price)
+    return {"status": status.HTTP_200_OK}
+
+
 @router.get("/price/{category_id}/{location_id}/{matrix_id}")
 async def read_price(
-        category_id: int,
-        location_id: int,
-        matrix_id: int,
-        session: AsyncSession = Depends(get_sql_session),
+    category_id: int,
+    location_id: int,
+    matrix_id: int,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> PriceResponse:
     price = await get_price(
         session, PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id)
@@ -123,7 +123,7 @@ async def read_price(
 
 @router.delete("/price/{category_id}/{location_id}/{matrix_id}")
 async def delete_price(
-        category_id: int, location_id: int, matrix_id: int, session: AsyncSession = Depends(get_sql_session)
+    category_id: int, location_id: int, matrix_id: int, session: AsyncSession = Depends(get_sql_session)
 ):
     try:
         await delete_price(
@@ -141,7 +141,7 @@ async def delete_price(
 
 @router.post("/price")
 async def create_price(
-        request: PriceCreateRequest, session: AsyncSession = Depends(get_sql_session)
+    request: PriceCreateRequest, session: AsyncSession = Depends(get_sql_session)
 ) -> PriceResponse:
     try:
         price = await add_price(session, request)

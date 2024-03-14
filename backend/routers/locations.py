@@ -15,9 +15,7 @@ router = APIRouter(tags=["locations"])
 
 
 @router.delete("/location")
-async def delete_all_locations(
-    session: AsyncSession = Depends(get_sql_session),
-) -> Dict:
+async def delete_all_locations(session: AsyncSession = Depends(get_sql_session)) -> Dict:
     await delete_table(session, Location)
     return {"status": status.HTTP_200_OK}
 
@@ -47,9 +45,11 @@ async def read_location(
 
 
 @router.put("/location/{location_id}")
-async def update_location(location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)):
+async def update_location(
+    location_id: int, location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)
+):
     try:
-        await set_location(session, location)
+        await set_location(session, location_id, location)
     except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"

@@ -10,7 +10,6 @@ class LocationCreateRequest(BaseModel):
 
 
 class LocationPutRequest(BaseModel):
-    id: int
     key: str
     name: str
     parent_id: Optional[int]

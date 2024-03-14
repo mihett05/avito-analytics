@@ -33,10 +33,10 @@ async def delete_all_matrices(session: AsyncSession = Depends(get_sql_session)) 
 
 @router.get("/matrix")
 async def read_matrices(
-        total: Annotated[int, Depends(ModelTotalCount(Matrix))],
-        _start: int = 1,
-        _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    total: Annotated[int, Depends(ModelTotalCount(Matrix))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> List[MatrixResponse]:
     matrices = await get_matrices(session, start=_start, end=_end)
     return [
@@ -52,10 +52,12 @@ async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_se
 
 
 @router.put("/matrix/{matrix_id}")
-async def update_matrix(matrix: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)):
+async def update_matrix(
+    matrix_id: int, matrix: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)
+):
     try:
-        await set_matrix(session, matrix)
-        await add_matrix_log(session, matrix_id=matrix.id, matrix_type=MatrixLogsTypeEnum.UPDATE)
+        await set_matrix(session, matrix_id, matrix)
+        await add_matrix_log(session, matrix_id=matrix_id, matrix_type=MatrixLogsTypeEnum.UPDATE)
     except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
@@ -65,12 +67,12 @@ async def update_matrix(matrix: MatrixPutRequest, session: AsyncSession = Depend
 
 @router.delete("/matrix/{matrix_id}")
 async def delete_matrix(
-        matrix_id: int,
-        session: AsyncSession = Depends(get_sql_session),
-        redis_session: Redis = Depends(get_redis_session),
+    matrix_id: int,
+    session: AsyncSession = Depends(get_sql_session),
+    redis_session: Redis = Depends(get_redis_session),
 ):
     try:
-        storage = await get_storage_conf(redis_session)
+        storage = await get_storage_conf(redis_session, need_raise=False)
         if matrix_id == storage.baseline or matrix_id in storage.discounts:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -79,7 +81,8 @@ async def delete_matrix(
 
         await add_matrix_log(session, matrix_id=matrix_id, matrix_type=MatrixLogsTypeEnum.DELETE)
         await delete_matrix_by_id(session, matrix_id)
-    except IntegrityError:
+    except IntegrityError as err:
+        print(err)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Matrix wasn't found")
 
     return {"status": status.HTTP_200_OK}
@@ -87,10 +90,10 @@ async def delete_matrix(
 
 @router.post("/matrix")
 async def create_matrix(
-        name: str,
-        file: UploadFile,
-        segment_id: Optional[int] = None,
-        session: AsyncSession = Depends(get_sql_session),
+    name: str,
+    file: UploadFile,
+    segment_id: Optional[int] = None,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> MatrixResponse:
     try:
         # cat loc price
