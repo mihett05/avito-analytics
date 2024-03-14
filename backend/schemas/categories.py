@@ -12,7 +12,6 @@ class CategoryCreateRequest(BaseModel):
 class CategoryPutRequest(BaseModel):
     key: str
     name: str
-    parent_id: Optional[int]
 
 
 class CategoryResponse(BaseModel):
