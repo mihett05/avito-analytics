@@ -69,7 +69,7 @@ async def read_location(
 @router.put("/location/{location_id}")
 async def update_location(
         location_id: int, location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)
-):
+) -> LocationResponse:
     try:
         result = await set_location(session, location_id, location)
     except IntegrityError as err:

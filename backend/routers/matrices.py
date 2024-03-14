@@ -77,15 +77,15 @@ async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_se
 @router.put("/matrix/{matrix_id}")
 async def update_matrix(
         matrix_id: int, matrix: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)
-):
+) -> MatrixResponse:
     try:
-        await set_matrix(session, matrix_id, matrix)
+        result = await set_matrix(session, matrix_id, matrix)
         await add_matrix_log(session, matrix_id=matrix_id, matrix_type=MatrixLogsTypeEnum.UPDATE)
     except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
-    return {"status": status.HTTP_200_OK}
+    return MatrixResponse(id=result.id, name=result.name, type=result.type, segment_id=result.segment_id)
 
 
 @router.delete("/matrix")
