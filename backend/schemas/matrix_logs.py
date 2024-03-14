@@ -5,9 +5,9 @@ from pydantic import BaseModel
 
 
 class MatrixLogTypePydantic(str, Enum):
-    CREATE = 'CREATE'
-    UPDATE = 'UPDATE'
-    DELETE = 'DELETE'
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE"
 
 
 class MatrixLogResponse(BaseModel):

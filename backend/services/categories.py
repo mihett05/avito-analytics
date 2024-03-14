@@ -20,11 +20,7 @@ async def get_categories(session: AsyncSession, start: int = 1, end: int = 50) -
 
 
 async def set_category(session: AsyncSession, category_id: int, category: CategoryPutRequest):
-    await session.execute(
-        update(Category)
-        .where(Category.id == category_id)
-        .values(name=category.name)
-    )
+    await session.execute(update(Category).where(Category.id == category_id).values(name=category.name))
     await session.commit()
 
 

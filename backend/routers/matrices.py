@@ -33,10 +33,10 @@ async def delete_all_matrices(session: AsyncSession = Depends(get_sql_session)) 
 
 @router.get("/matrix")
 async def read_matrices(
-        total: Annotated[int, Depends(ModelTotalCount(Matrix))],
-        _start: int = 1,
-        _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    total: Annotated[int, Depends(ModelTotalCount(Matrix))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> List[MatrixResponse]:
     matrices = await get_matrices(session, start=_start, end=_end)
     return [
@@ -52,7 +52,9 @@ async def read_matrix(matrix_id: int, session: AsyncSession = Depends(get_sql_se
 
 
 @router.put("/matrix/{matrix_id}")
-async def update_matrix(matrix_id: int, matrix: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)):
+async def update_matrix(
+    matrix_id: int, matrix: MatrixPutRequest, session: AsyncSession = Depends(get_sql_session)
+):
     try:
         await set_matrix(session, matrix_id, matrix)
         await add_matrix_log(session, matrix_id=matrix_id, matrix_type=MatrixLogsTypeEnum.UPDATE)
@@ -65,9 +67,9 @@ async def update_matrix(matrix_id: int, matrix: MatrixPutRequest, session: Async
 
 @router.delete("/matrix/{matrix_id}")
 async def delete_matrix(
-        matrix_id: int,
-        session: AsyncSession = Depends(get_sql_session),
-        redis_session: Redis = Depends(get_redis_session),
+    matrix_id: int,
+    session: AsyncSession = Depends(get_sql_session),
+    redis_session: Redis = Depends(get_redis_session),
 ):
     try:
         storage = await get_storage_conf(redis_session, need_raise=False)
@@ -88,10 +90,10 @@ async def delete_matrix(
 
 @router.post("/matrix")
 async def create_matrix(
-        name: str,
-        file: UploadFile,
-        segment_id: Optional[int] = None,
-        session: AsyncSession = Depends(get_sql_session),
+    name: str,
+    file: UploadFile,
+    segment_id: Optional[int] = None,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> MatrixResponse:
     try:
         # cat loc price

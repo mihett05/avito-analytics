@@ -29,9 +29,9 @@ router = APIRouter(tags=["prices"])
 
 @router.post("/price/target")
 async def calculate_target_price(
-        request: PriceGetRequest,
-        session: AsyncSession = Depends(get_sql_session),
-        redis_session: Redis = Depends(get_redis_session),
+    request: PriceGetRequest,
+    session: AsyncSession = Depends(get_sql_session),
+    redis_session: Redis = Depends(get_redis_session),
 ) -> PriceGetResponse:
     asyncio.create_task(add_updates(redis_session, request.location_id, request.category_id))
 
@@ -46,10 +46,10 @@ async def calculate_target_price(
 
 @router.get("/price")
 async def read_prices(
-        total: Annotated[int, Depends(ModelTotalCount(Price))],
-        _start: int = 1,
-        _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    total: Annotated[int, Depends(ModelTotalCount(Price))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> List[PriceResponse]:
     prices = await get_prices(session, start=_start, end=_end)
     return [
@@ -65,10 +65,10 @@ async def read_prices(
 
 @router.get("/price/{matrix_id}")
 async def read_prices_matrix(
-        matrix_id: int,
-        _start: int = 1,
-        _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    matrix_id: int,
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> Response:
     data = [
         PriceResponse(
@@ -80,10 +80,10 @@ async def read_prices_matrix(
         for price in await get_prices(session, matrix_id=matrix_id, start=_start, end=_end)
     ]
 
-    return Response(content=data, headers={
-        "Access-Control-Expose-Headers": "X-Total-Count",
-        "X-Total-Count": str(len(data))
-    })
+    return Response(
+        content=data,
+        headers={"Access-Control-Expose-Headers": "X-Total-Count", "X-Total-Count": str(len(data))},
+    )
 
 
 @router.put("/price")
@@ -105,10 +105,10 @@ async def delete_all_prices(session: AsyncSession = Depends(get_sql_session)) ->
 
 @router.get("/price/{category_id}/{location_id}/{matrix_id}")
 async def read_price(
-        category_id: int,
-        location_id: int,
-        matrix_id: int,
-        session: AsyncSession = Depends(get_sql_session),
+    category_id: int,
+    location_id: int,
+    matrix_id: int,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> PriceResponse:
     price = await get_price(
         session, PriceReadRequest(category_id=category_id, location_id=location_id, matrix_id=matrix_id)
@@ -123,7 +123,7 @@ async def read_price(
 
 @router.delete("/price/{category_id}/{location_id}/{matrix_id}")
 async def delete_price(
-        category_id: int, location_id: int, matrix_id: int, session: AsyncSession = Depends(get_sql_session)
+    category_id: int, location_id: int, matrix_id: int, session: AsyncSession = Depends(get_sql_session)
 ):
     try:
         await delete_price(
@@ -141,7 +141,7 @@ async def delete_price(
 
 @router.post("/price")
 async def create_price(
-        request: PriceCreateRequest, session: AsyncSession = Depends(get_sql_session)
+    request: PriceCreateRequest, session: AsyncSession = Depends(get_sql_session)
 ) -> PriceResponse:
     try:
         price = await add_price(session, request)

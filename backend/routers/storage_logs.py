@@ -14,10 +14,10 @@ router = APIRouter(tags=["matrix_logs"])
 
 @router.get("/storage_logs")
 async def read_matrices_logs(
-        total: Annotated[int, Depends(ModelTotalCount(Matrix))],
-        _start: int = 1,
-        _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    total: Annotated[int, Depends(ModelTotalCount(Matrix))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> List[StorageLogsResponse]:
     storage_logs = await get_storage_logs(session, start=_start, end=_end)
     return [
@@ -25,7 +25,7 @@ async def read_matrices_logs(
             id=storage_log.id,
             baseline=storage_log.baseline,
             discounts=storage_log.discounts,
-            happened_at=storage_log.happened_at
+            happened_at=storage_log.happened_at,
         )
         for storage_log in storage_logs
     ]

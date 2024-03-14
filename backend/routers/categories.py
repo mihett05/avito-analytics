@@ -22,10 +22,10 @@ async def delete_all_categories(session: AsyncSession = Depends(get_sql_session)
 
 @router.get("/category")
 async def read_categories(
-        total: Annotated[int, Depends(ModelTotalCount(Category))],
-        _start: int = 1,
-        _end: int = 50,
-        session: AsyncSession = Depends(get_sql_session),
+    total: Annotated[int, Depends(ModelTotalCount(Category))],
+    _start: int = 1,
+    _end: int = 50,
+    session: AsyncSession = Depends(get_sql_session),
 ) -> List[CategoryResponse]:
     categories = await get_categories(session, start=_start, end=_end)
     return [
@@ -35,7 +35,9 @@ async def read_categories(
 
 
 @router.get("/category/{category_id}")
-async def read_category(category_id: int, session: AsyncSession = Depends(get_sql_session)) -> CategoryResponse:
+async def read_category(
+    category_id: int, session: AsyncSession = Depends(get_sql_session)
+) -> CategoryResponse:
     category = await get_category(session, category_id)
     return CategoryResponse(
         id=category.id, key=category.key, name=category.name, parent_id=category.parent_id
@@ -43,7 +45,9 @@ async def read_category(category_id: int, session: AsyncSession = Depends(get_sq
 
 
 @router.put("/category/{category_id}")
-async def update_category(category_id: int, category: CategoryPutRequest, session: AsyncSession = Depends(get_sql_session)):
+async def update_category(
+    category_id: int, category: CategoryPutRequest, session: AsyncSession = Depends(get_sql_session)
+):
     try:
         await set_category(session, category_id, category)
     except IntegrityError as err:
@@ -61,7 +65,7 @@ async def read_location(category_id: int, session: AsyncSession = Depends(get_sq
 
 @router.post("/category")
 async def create_category(
-        request: CategoryCreateRequest, session: AsyncSession = Depends(get_sql_session)
+    request: CategoryCreateRequest, session: AsyncSession = Depends(get_sql_session)
 ) -> CategoryResponse:
     try:
         category = await add_category(session, request)
