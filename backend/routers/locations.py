@@ -45,9 +45,9 @@ async def read_location(
 
 
 @router.put("/location/{location_id}")
-async def update_location(location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)):
+async def update_location(location_id: int, location: LocationPutRequest, session: AsyncSession = Depends(get_sql_session)):
     try:
-        await set_location(session, location)
+        await set_location(session, location_id, location)
     except IntegrityError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"

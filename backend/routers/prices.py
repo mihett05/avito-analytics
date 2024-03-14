@@ -44,12 +44,6 @@ async def calculate_target_price(
     )
 
 
-@router.delete("/price")
-async def delete_all_prices(session: AsyncSession = Depends(get_sql_session)) -> Dict:
-    await delete_table(session, Price)
-    return {"status": status.HTTP_200_OK}
-
-
 @router.get("/price")
 async def read_prices(
         total: Annotated[int, Depends(ModelTotalCount(Price))],
@@ -100,6 +94,12 @@ async def update_price_router(location: PricePutRequest, session: AsyncSession =
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid parent id\nMore info:\n\n{err}"
         )
+    return {"status": status.HTTP_200_OK}
+
+
+@router.delete("/price")
+async def delete_all_prices(session: AsyncSession = Depends(get_sql_session)) -> Dict:
+    await delete_table(session, Price)
     return {"status": status.HTTP_200_OK}
 
 

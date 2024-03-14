@@ -19,10 +19,10 @@ async def get_locations(session: AsyncSession, start: int = None, end: int = Non
     ]
 
 
-async def set_location(session: AsyncSession, location: LocationPutRequest):
+async def set_location(session: AsyncSession, location_id: int, location: LocationPutRequest):
     await session.execute(
         update(Location)
-        .where(Location.id == location.id)
+        .where(Location.id == location_id)
         .values(name=location.name)
     )
     await session.commit()

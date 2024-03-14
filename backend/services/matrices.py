@@ -27,10 +27,10 @@ async def get_matrix(session: AsyncSession, matrix_id: int) -> Matrix:
     return Matrix(id=res.id, name=res.name, type=res.type, segment_id=res.segment_id)
 
 
-async def set_matrix(session: AsyncSession, matrix: MatrixPutRequest):
+async def set_matrix(session: AsyncSession, matrix_id: int, matrix: MatrixPutRequest):
     await session.execute(
         update(Matrix)
-        .where(Matrix.id == matrix.id)
+        .where(Matrix.id == matrix_id)
         .values(
             name=matrix.name,
             segment_id=matrix.segment_id,

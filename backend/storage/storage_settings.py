@@ -7,9 +7,11 @@ from starlette import status
 from schemas.storage import StorageConfResponse
 
 
-async def get_storage_conf(client: Redis) -> StorageConfResponse:
+async def get_storage_conf(client: Redis, need_raise=True) -> StorageConfResponse:
     if not await client.get("baseline"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Storage wasn't set yet")
+        if need_raise:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Storage wasn't set yet")
+        return StorageConfResponse(baseline=-1, discounts=[])
 
     return StorageConfResponse(
         baseline=await client.get("baseline"), discounts=await client.smembers("discounts") or []
