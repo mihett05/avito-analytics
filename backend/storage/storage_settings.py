@@ -14,7 +14,8 @@ async def get_storage_conf(client: Redis, need_raise=True) -> StorageConfRespons
         return StorageConfResponse(baseline=-1, discounts=[])
 
     return StorageConfResponse(
-        baseline=await client.get("baseline"), discounts=await client.smembers("discounts") or []
+        baseline=await client.get("baseline"),
+        discounts=await client.smembers("discounts") or []
     )
 
 
@@ -24,7 +25,10 @@ async def set_baseline(client: Redis, baseline_id: int):
 
 async def add_discounts(client: Redis, discount_ids: List[int]):
     await client.delete("discounts")
-    await client.sadd("discounts", *set(discount_ids))
+
+    discount_ids = set(discount_ids)
+    if discount_ids:
+        await client.sadd("discounts", *discount_ids)
 
 
 async def remove_discounts(client: Redis, discount_ids: List[int]):

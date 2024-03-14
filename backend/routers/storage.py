@@ -15,23 +15,11 @@ from storage.analytics import get_analytics
 router = APIRouter(tags=["storage"])
 
 
-@router.get("/storage/configuration")
-async def read_storage(
-    redis_session: Redis = Depends(get_redis_session),
-) -> StorageConfResponse:
-    return await storage_settings.get_storage_conf(redis_session)
-
-
-@router.get("/storage/analytics")
-async def read_analytics(redis_session: Redis = Depends(get_redis_session)):
-    return await get_analytics(redis_session)
-
-
 @router.post("/storage/baseline")
 async def set_baseline(
-    baseline: int,
-    redis_session: Redis = Depends(get_redis_session),
-    session: AsyncSession = Depends(get_sql_session),
+        baseline: int,
+        redis_session: Redis = Depends(get_redis_session),
+        session: AsyncSession = Depends(get_sql_session),
 ):
     matrix = await get_matrix(session, baseline)
     if not matrix.type == MatrixTypeEnum.BASE:
@@ -44,12 +32,24 @@ async def set_baseline(
 
 @router.post("/storage/discounts")
 async def set_discounts(
-    discount: SetDiscountsRequest,
-    redis_session: Redis = Depends(get_redis_session),
-    session: AsyncSession = Depends(get_sql_session),
+        discount: SetDiscountsRequest,
+        redis_session: Redis = Depends(get_redis_session),
+        session: AsyncSession = Depends(get_sql_session),
 ):
     discounts = await get_matrix__id_in(session, ides=discount.discounts)
 
     await storage_settings.add_discounts(redis_session, list(map(lambda x: x.id, discounts)))
     await add_storage_log(session, await storage_settings.get_storage_conf(redis_session))
     return {"status": status.HTTP_200_OK}
+
+
+@router.get("/storage/configuration")
+async def read_storage(
+        redis_session: Redis = Depends(get_redis_session),
+) -> StorageConfResponse:
+    return await storage_settings.get_storage_conf(redis_session)
+
+
+@router.get("/storage/analytics")
+async def read_analytics(redis_session: Redis = Depends(get_redis_session)):
+    return await get_analytics(redis_session)
